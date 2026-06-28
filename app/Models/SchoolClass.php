@@ -12,4 +12,9 @@ class SchoolClass extends Model
         'grade',
     ];
     use HasFactory;
+
+    public function students()
+    {
+        return $this->hasMany(User::class, 'class_id');
+    }
 }

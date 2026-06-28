@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Models\SchoolClass;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
@@ -12,14 +13,15 @@ class UserController extends Controller
 {
     public function index()
     {
-        $users = User::latest()->get();
+        $users = User::with('schoolClass')->latest()->get();
         return view('admin.users.index', compact('users'));
     }
 
     public function create()
     {
         $roles = Role::pluck('name');
-        return view('admin.users.create', compact('roles'));
+        $classes = SchoolClass::orderBy('grade')->orderBy('name')->get();
+        return view('admin.users.create', compact('roles', 'classes'));
     }
 
     public function store(Request $request)
@@ -29,12 +31,18 @@ class UserController extends Controller
             'email'    => 'required|email|unique:users,email',
             'password' => 'required|min:6',
             'role'     => 'required|exists:roles,name',
+            'nis'      => 'nullable|required_if:role,siswa|unique:users,nis',
+            'class_id' => 'nullable|required_if:role,siswa|exists:school_classes,id',
         ]);
+
+        $isSiswa = $request->role === 'siswa';
 
         $user = User::create([
             'name'     => $request->name,
             'email'    => $request->email,
             'password' => Hash::make($request->password),
+            'nis'      => $isSiswa ? $request->nis : null,
+            'class_id' => $isSiswa ? $request->class_id : null,
         ]);
 
         $user->assignRole($request->role);
@@ -45,7 +53,8 @@ class UserController extends Controller
     public function edit(User $user)
     {
         $roles = Role::pluck('name');
-        return view('admin.users.edit', compact('user', 'roles'));
+        $classes = SchoolClass::orderBy('grade')->orderBy('name')->get();
+        return view('admin.users.edit', compact('user', 'roles', 'classes'));
     }
 
     public function update(Request $request, User $user)
@@ -55,10 +64,16 @@ class UserController extends Controller
             'email'    => 'required|email|unique:users,email,' . $user->id,
             'password' => 'nullable|min:6',
             'role'     => 'required|exists:roles,name',
+            'nis'      => 'nullable|required_if:role,siswa|unique:users,nis,' . $user->id,
+            'class_id' => 'nullable|required_if:role,siswa|exists:school_classes,id',
         ]);
 
-        $user->name  = $request->name;
-        $user->email = $request->email;
+        $isSiswa = $request->role === 'siswa';
+
+        $user->name     = $request->name;
+        $user->email    = $request->email;
+        $user->nis      = $isSiswa ? $request->nis : null;
+        $user->class_id = $isSiswa ? $request->class_id : null;
         if ($request->filled('password')) {
             $user->password = Hash::make($request->password);
         }
@@ -71,7 +86,6 @@ class UserController extends Controller
 
     public function destroy(User $user)
     {
-        // Cegah admin menghapus akunnya sendiri
         if ($user->id === auth()->id()) {
             return back()->with('success', 'Anda tidak bisa menghapus akun sendiri.');
         }

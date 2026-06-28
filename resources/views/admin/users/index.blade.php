@@ -19,6 +19,8 @@
                         <th class="p-3 border">No</th>
                         <th class="p-3 border">Nama</th>
                         <th class="p-3 border">Email</th>
+                        <th class="p-3 border">NIS</th>
+                        <th class="p-3 border">Kelas</th>
                         <th class="p-3 border">Role</th>
                         <th class="p-3 border text-center">Aksi</th>
                     </tr>
@@ -33,6 +35,8 @@
                             <td class="p-3 border"><?= $i + 1 ?></td>
                             <td class="p-3 border font-medium text-gray-800"><?= e($user->name) ?></td>
                             <td class="p-3 border"><?= e($user->email) ?></td>
+                            <td class="p-3 border"><?= e($user->nis ?? '-') ?></td>
+                            <td class="p-3 border"><?= e($user->schoolClass->name ?? '-') ?></td>
                             <td class="p-3 border"><span class="px-2 py-1 rounded text-xs font-medium <?= $badge ?>"><?= ucfirst($role ?? '-') ?></span></td>
                             <td class="p-3 border text-center whitespace-nowrap space-x-2">
                                 <a href="<?= route('admin.users.edit', $user) ?>" class="inline-flex items-center justify-center w-8 h-8 rounded bg-indigo-50 text-indigo-600 hover:bg-indigo-100" title="Edit"><i class="fa-solid fa-pen"></i></a>
@@ -43,7 +47,7 @@
                             </td>
                         </tr>
                     @empty
-                        <tr><td colspan="5" class="p-4 text-center text-gray-500">Belum ada data user.</td></tr>
+                        <tr><td colspan="7" class="p-4 text-center text-gray-500">Belum ada data user.</td></tr>
                     @endforelse
                 </tbody>
             </table>

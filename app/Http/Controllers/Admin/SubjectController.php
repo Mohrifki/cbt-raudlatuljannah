@@ -14,7 +14,7 @@ class SubjectController extends Controller
     public function index()
     {
         $subjects = Subject::all();
-        return view('admin.subject.index', compact('subjects'));
+        return view('admin.subjects.index', compact('subjects'));
     }
 
     /**
@@ -22,7 +22,7 @@ class SubjectController extends Controller
      */
     public function create()
     {
-        return view('admin.subject.create');
+        return view('admin.subjects.create');
     }
 
     /**
@@ -42,7 +42,7 @@ class SubjectController extends Controller
     }
     public function edit(Subject $subject)
     {
-        return view('admin.subject,edit', compact("subject"));
+        return view('admin.subjects.edit', compact("subject"));
     }
     public function update(Request $request, Subject $subject)
     {
@@ -62,35 +62,4 @@ class SubjectController extends Controller
         ->with('success', 'Mata pelajaran berhasil dihapus.');
     }
 
-    /**
-     * Display the specified resource.
-     */
-    public function show(string $id)
-    {
-        //
-    }
-
-    /**
-     * Show the form for editing the specified resource.
-     */
-    public function edit(string $id)
-    {
-        //
-    }
-
-    /**
-     * Update the specified resource in storage.
-     */
-    public function update(Request $request, string $id)
-    {
-        //
-    }
-
-    /**
-     * Remove the specified resource from storage.
-     */
-    public function destroy(string $id)
-    {
-        //
-    }
 }

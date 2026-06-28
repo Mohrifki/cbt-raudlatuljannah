@@ -4,7 +4,7 @@ use App\Http\Controllers\ProfileController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\Admin\SubjectController;
-
+use App\Http\Controllers\Admin\SchoolClassController;
 /*
 |--------------------------------------------------------------------------
 | Web Routes
@@ -33,6 +33,11 @@ Route::middleware('auth')->group(function () {
     Route::middleware('role:admin')->prefix('admin')->name('admin.')->group(function () {
         Route::get('/dashboard', fn() => view('admin.dashboard'))->name('dashboard');
         Route::resource('subjects', SubjectController::class)->except('show');
+    });
+    Route::middleware('role:admin')->prefix('admin')->name('admin.')->group(function () {
+        Route::get('/dashboard', fn() => view('admin.dashboard'))->name('dashboard');
+        Route::resource('subjects', SubjectController::class)->except('show');
+        Route::resource('classes', SchoolClassController::class)->except('show');
     });
 
     // === AREA GURU ===

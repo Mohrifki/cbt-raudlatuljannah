@@ -12,12 +12,13 @@ class QuestionController extends Controller
     public function index(Request $request)
     {
         $subjects = Subject::orderBy('name')->get();
+        $counts = Question::selectRaw('subject_id, COUNT(*) as total')->groupBy('subject_id')->pluck('total', 'subject_id');
         $query = Question::with('subject')->latest();
         if ($request->filled('subject_id')) {
             $query->where('subject_id', $request->subject_id);
         }
         $questions = $query->get();
-        return view('admin.questions.index', compact('questions', 'subjects'));
+        return view('admin.questions.index', compact('questions', 'subjects', 'counts'));
     }
 
     public function create()

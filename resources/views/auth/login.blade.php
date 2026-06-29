@@ -8,12 +8,18 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     @vite(['resources/css/app.css', 'resources/js/app.js'])
 </head>
-<body class="bg-gray-900 h-screen overflow-hidden flex items-center justify-center p-4">
+<body class="bg-gray-900 min-h-screen md:h-screen md:overflow-hidden flex items-center justify-center p-4">
 
-    <div class="w-full max-w-5xl bg-white rounded-3xl shadow-2xl overflow-hidden grid md:grid-cols-2 max-h-[calc(100vh-2rem)]">
+    <div class="w-full max-w-5xl bg-white rounded-3xl shadow-2xl overflow-hidden grid md:grid-cols-2 md:max-h-[calc(100vh-2rem)]">
 
-        <!-- KIRI: FORM -->
-        <div class="p-6 sm:p-10 flex flex-col justify-center overflow-y-auto">
+        <!-- FOTO SEKOLAH: di mobile jadi banner atas, di desktop pindah ke kanan -->
+        <div class="order-1 md:order-2 relative m-4 mb-0 h-40 rounded-2xl overflow-hidden md:m-0 md:mb-0 md:h-auto md:rounded-none">
+            <img src="<?= asset('images/logosekolah.jpg') ?>" alt="Sekolah" class="absolute inset-0 w-full h-full object-cover">
+            <div class="absolute inset-0 bg-gradient-to-t from-black/40 to-transparent"></div>
+        </div>
+
+        <!-- FORM -->
+        <div class="order-2 md:order-1 p-6 sm:p-10 flex flex-col justify-center overflow-y-auto">
             <div class="flex items-center gap-3 mb-6">
                 <img src="<?= asset('images/logo.png') ?>" alt="Logo" class="w-11 h-11 object-contain">
                 <span class="font-bold text-xl text-gray-800">CBT <span class="text-green-600">Smaradja</span></span>
@@ -60,12 +66,6 @@
             </form>
 
             <p class="text-center text-xs text-gray-400 mt-6">© <?= date('Y') ?> CBT Smaradja. Hak cipta dilindungi.</p>
-        </div>
-
-        <!-- KANAN: FOTO SEKOLAH -->
-        <div class="hidden md:block relative">
-            <img src="<?= asset('images/logosekolah.jpg') ?>" alt="Sekolah" class="absolute inset-0 w-full h-full object-cover">
-            <div class="absolute inset-0 bg-gradient-to-t from-black/40 to-transparent"></div>
         </div>
 
     </div>

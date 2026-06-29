@@ -51,4 +51,9 @@ class User extends Authenticatable
     {
         return $this->belongsTo(SchoolClass::class, 'class_id');
     }
+
+    public function electiveSubjects()
+    {
+        return $this->belongsToMany(Subject::class, 'student_subject', 'user_id', 'subject_id')->withTimestamps();
+    }
 }

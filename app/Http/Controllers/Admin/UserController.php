@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\SchoolClass;
+use App\Models\Subject;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
@@ -21,18 +22,21 @@ class UserController extends Controller
     {
         $roles = Role::pluck('name');
         $classes = SchoolClass::orderBy('grade')->orderBy('name')->get();
-        return view('admin.users.create', compact('roles', 'classes'));
+        $electives = Subject::where('type', 'pilihan')->orderBy('name')->get();
+        return view('admin.users.create', compact('roles', 'classes', 'electives'));
     }
 
     public function store(Request $request)
     {
         $request->validate([
-            'name'     => 'required|string|max:255',
-            'email'    => 'required|email|unique:users,email',
-            'password' => 'required|min:6',
-            'role'     => 'required|exists:roles,name',
-            'nis'      => 'nullable|required_if:role,siswa|unique:users,nis',
-            'class_id' => 'nullable|required_if:role,siswa|exists:school_classes,id',
+            'name'                => 'required|string|max:255',
+            'email'               => 'required|email|unique:users,email',
+            'password'            => 'required|min:6',
+            'role'                => 'required|exists:roles,name',
+            'nis'                 => 'nullable|required_if:role,siswa|unique:users,nis',
+            'class_id'            => 'nullable|required_if:role,siswa|exists:school_classes,id',
+            'elective_subjects'   => 'nullable|array',
+            'elective_subjects.*' => 'exists:subjects,id',
         ]);
 
         $isSiswa = $request->role === 'siswa';
@@ -47,6 +51,9 @@ class UserController extends Controller
 
         $user->assignRole($request->role);
 
+        // Simpan mapel pilihan hanya untuk siswa
+        $user->electiveSubjects()->sync($isSiswa ? ($request->elective_subjects ?? []) : []);
+
         return redirect()->route('admin.users.index')->with('success', 'User berhasil ditambahkan.');
     }
 
@@ -54,18 +61,21 @@ class UserController extends Controller
     {
         $roles = Role::pluck('name');
         $classes = SchoolClass::orderBy('grade')->orderBy('name')->get();
-        return view('admin.users.edit', compact('user', 'roles', 'classes'));
+        $electives = Subject::where('type', 'pilihan')->orderBy('name')->get();
+        return view('admin.users.edit', compact('user', 'roles', 'classes', 'electives'));
     }
 
     public function update(Request $request, User $user)
     {
         $request->validate([
-            'name'     => 'required|string|max:255',
-            'email'    => 'required|email|unique:users,email,' . $user->id,
-            'password' => 'nullable|min:6',
-            'role'     => 'required|exists:roles,name',
-            'nis'      => 'nullable|required_if:role,siswa|unique:users,nis,' . $user->id,
-            'class_id' => 'nullable|required_if:role,siswa|exists:school_classes,id',
+            'name'                => 'required|string|max:255',
+            'email'               => 'required|email|unique:users,email,' . $user->id,
+            'password'            => 'nullable|min:6',
+            'role'                => 'required|exists:roles,name',
+            'nis'                 => 'nullable|required_if:role,siswa|unique:users,nis,' . $user->id,
+            'class_id'            => 'nullable|required_if:role,siswa|exists:school_classes,id',
+            'elective_subjects'   => 'nullable|array',
+            'elective_subjects.*' => 'exists:subjects,id',
         ]);
 
         $isSiswa = $request->role === 'siswa';
@@ -80,6 +90,7 @@ class UserController extends Controller
         $user->save();
 
         $user->syncRoles([$request->role]);
+        $user->electiveSubjects()->sync($isSiswa ? ($request->elective_subjects ?? []) : []);
 
         return redirect()->route('admin.users.index')->with('success', 'User berhasil diperbarui.');
     }

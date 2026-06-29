@@ -26,6 +26,8 @@ Route::middleware('auth')->group(function () {
         Route::resource('users', UserController::class)->except('show');
         Route::resource('subjects', SubjectController::class)->except('show');
         Route::resource('classes', SchoolClassController::class)->except('show');
+        Route::resource('questions', \App\Http\Controllers\Admin\QuestionController::class)->except('show');
+        Route::post('media/upload', [\App\Http\Controllers\Admin\MediaUploadController::class, 'store'])->name('media.upload');
     });
 
     // === AREA GURU ===

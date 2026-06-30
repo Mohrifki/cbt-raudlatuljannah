@@ -6,6 +6,9 @@ use App\Http\Controllers\Controller;
 use App\Models\Question;
 use App\Models\Subject;
 use Illuminate\Http\Request;
+use App\Imports\QuestionsImport;
+use App\Exports\QuestionsTemplateExport;
+use Maatwebsite\Excel\Facades\Excel;
 
 class QuestionController extends Controller
 {
@@ -44,6 +47,8 @@ class QuestionController extends Controller
             'option_e'       => $isPg ? ($data['option_e'] ?? null) : null,
             'correct_option' => $isPg ? $data['correct_option'] : null,
             'answer_key'     => $request->type === 'essay' ? ($data['answer_key'] ?? null) : null,
+            'language'     => $request->type === 'coding' ? ($data['language'] ?? null) : null,
+            'starter_code' => $request->type === 'coding' ? ($data['starter_code'] ?? null) : null,
             'score'          => $data['score'],
         ]);
 
@@ -72,6 +77,8 @@ class QuestionController extends Controller
             'option_e'       => $isPg ? ($data['option_e'] ?? null) : null,
             'correct_option' => $isPg ? $data['correct_option'] : null,
             'answer_key'     => $request->type === 'essay' ? ($data['answer_key'] ?? null) : null,
+            'language'     => $request->type === 'coding' ? ($data['language'] ?? null) : null,
+            'starter_code' => $request->type === 'coding' ? ($data['starter_code'] ?? null) : null,
             'score'          => $data['score'],
         ]);
 
@@ -88,7 +95,7 @@ class QuestionController extends Controller
     {
         return $request->validate([
             'subject_id'     => 'required|exists:subjects,id',
-            'type'           => 'required|in:pilihan_ganda,essay',
+            'type'           => 'required|in:pilihan_ganda,essay,coding',
             'question'       => 'required|string',
             'score'          => 'required|integer|min:1',
             'option_a'       => 'nullable|required_if:type,pilihan_ganda',
@@ -98,6 +105,8 @@ class QuestionController extends Controller
             'option_e'       => 'nullable',
             'correct_option' => 'nullable|required_if:type,pilihan_ganda|in:a,b,c,d,e',
             'answer_key'     => 'nullable|string',
+            'language'       => 'nullable|required_if:type,coding|string',
+            'starter_code'   => 'nullable|string',
         ], [
             'correct_option.required_if' => 'Pilih kunci jawaban untuk soal pilihan ganda.',
             'option_a.required_if'       => 'Pilihan A wajib diisi.',
@@ -105,5 +114,31 @@ class QuestionController extends Controller
             'option_c.required_if'       => 'Pilihan C wajib diisi.',
             'option_d.required_if'       => 'Pilihan D wajib diisi.',
         ]);
+    }
+
+    public function importForm()
+    {
+        return view('admin.questions.import');
+    }
+
+    public function downloadTemplate()
+    {
+        return Excel::download(new QuestionsTemplateExport, 'template-soal.xlsx');
+    }
+
+    public function import(Request $request)
+    {
+        $request->validate([
+            'file' => 'required|file|mimes:xlsx,xls,csv',
+        ], [
+            'file.mimes' => 'File harus berformat Excel (.xlsx, .xls) atau .csv',
+        ]);
+
+        $import = new QuestionsImport();
+        Excel::import($import, $request->file('file'));
+
+        return redirect()->route('admin.questions.index')
+            ->with('success', "Berhasil import {$import->imported} soal.")
+            ->with('import_errors', $import->errors);
     }
 }

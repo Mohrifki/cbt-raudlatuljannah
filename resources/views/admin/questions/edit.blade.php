@@ -31,6 +31,7 @@
                         <select name="type" id="type-select" class="w-full border-gray-300 rounded-lg shadow-sm focus:border-green-500 focus:ring-green-500">
                             <option value="essay" <?= $type === 'essay' ? 'selected' : '' ?>>Essay</option>
                             <option value="pilihan_ganda" <?= $type === 'pilihan_ganda' ? 'selected' : '' ?>>Pilihan Ganda</option>
+                            <option value="coding" <?= $type === 'coding' ? 'selected' : '' ?>>Coding (Informatika)</option>
                         </select>
                     </div>
                 </div>
@@ -39,17 +40,18 @@
                     <label class="block text-sm font-medium text-gray-700 mb-1.5">Pertanyaan</label>
                     <input type="hidden" name="question" id="question-input" value="<?= e(old('question', $question->question)) ?>">
                     <div id="question-editor"><?= old('question', $question->question) ?></div>
-                    <p class="text-xs text-gray-400 mt-1">Rumus: klik tombol formula (√x) lalu tulis LaTeX, mis. <code>E = mc^2</code> atau <code>\frac{a}{b}</code>.</p>
+                    <p class="text-xs text-gray-400 mt-1">Rumus: klik tombol formula lalu pilih simbol/menu.</p>
                     @error('question')<p class="text-red-600 text-sm mt-1"><?= $message ?></p>@enderror
                 </div>
 
                 <div id="pg-options" class="space-y-3" style="display: <?= $type === 'pilihan_ganda' ? 'block' : 'none' ?>;">
                     <p class="text-sm font-medium text-gray-700">Pilihan Jawaban <span class="text-gray-400 font-normal">(klik bulatan di kiri sebagai kunci jawaban)</span></p>
                     @foreach (['a','b','c','d','e'] as $opt)
+                        <?php $optVal = old('option_'.$opt, data_get($question, 'option_'.$opt)); ?>
                         <div class="flex items-center gap-3">
                             <input type="radio" name="correct_option" value="<?= $opt ?>" <?= old('correct_option', $question->correct_option) === $opt ? 'checked' : '' ?> class="text-green-600 focus:ring-green-500">
                             <span class="w-8 h-8 flex items-center justify-center rounded-full bg-gray-100 font-semibold text-gray-600 uppercase shrink-0"><?= $opt ?></span>
-                            <input type="text" name="option_<?= $opt ?>" value="<?= old('option_'.$opt, $question->{'option_'.$opt}) ?>" class="flex-1 border-gray-300 rounded-lg shadow-sm focus:border-green-500 focus:ring-green-500" placeholder="Pilihan <?= strtoupper($opt) ?><?= $opt === 'e' ? ' (opsional)' : '' ?>">
+                            <input type="text" name="option_<?= $opt ?>" value="<?= e($optVal) ?>" class="flex-1 border-gray-300 rounded-lg shadow-sm focus:border-green-500 focus:ring-green-500" placeholder="Pilihan <?= strtoupper($opt) ?><?= $opt === 'e' ? ' (opsional)' : '' ?>">
                         </div>
                     @endforeach
                     @error('correct_option')<p class="text-red-600 text-sm mt-1"><?= $message ?></p>@enderror
@@ -59,6 +61,25 @@
                     <label class="block text-sm font-medium text-gray-700 mb-1.5">Kunci Jawaban / Rubrik <span class="text-gray-400 font-normal">(opsional)</span></label>
                     <input type="hidden" name="answer_key" id="answer-input" value="<?= e(old('answer_key', $question->answer_key)) ?>">
                     <div id="answer-editor"><?= old('answer_key', $question->answer_key) ?></div>
+                </div>
+
+                <?php $lang = old('language', $question->language); ?>
+                <div id="coding-fields" style="display: <?= $type === 'coding' ? 'block' : 'none' ?>;" class="space-y-3">
+                    <div class="w-full sm:w-60">
+                        <label class="block text-sm font-medium text-gray-700 mb-1.5">Bahasa Pemrograman</label>
+                        <select name="language" id="language-select" class="w-full border-gray-300 rounded-lg shadow-sm focus:border-green-500 focus:ring-green-500">
+                            <option value="python" <?= $lang === 'python' ? 'selected' : '' ?>>Python</option>
+                            <option value="javascript" <?= $lang === 'javascript' ? 'selected' : '' ?>>JavaScript</option>
+                            <option value="c" <?= $lang === 'c' ? 'selected' : '' ?>>C</option>
+                            <option value="cpp" <?= $lang === 'cpp' ? 'selected' : '' ?>>C++</option>
+                            <option value="java" <?= $lang === 'java' ? 'selected' : '' ?>>Java</option>
+                        </select>
+                        @error('language')<p class="text-red-600 text-sm mt-1"><?= $message ?></p>@enderror
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1.5">Kode Awal / Starter Code <span class="text-gray-400 font-normal">(opsional)</span></label>
+                        <textarea name="starter_code" id="starter-code" rows="10"><?= old('starter_code', $question->starter_code) ?></textarea>
+                    </div>
                 </div>
 
                 <div class="w-full sm:w-40">

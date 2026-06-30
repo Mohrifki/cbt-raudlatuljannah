@@ -5,6 +5,15 @@
             <div class="mb-4 rounded bg-green-100 text-green-800 px-4 py-2 text-sm"><?= session('success') ?></div>
         @endif
 
+        @if (session('import_errors') && count(session('import_errors')))
+            <div class="mb-4 rounded bg-amber-50 border border-amber-200 text-amber-800 px-4 py-3 text-sm">
+                <p class="font-semibold mb-1">Beberapa baris dilewati:</p>
+                @foreach (session('import_errors') as $err)
+                    <div>• <?= e($err) ?></div>
+                @endforeach
+            </div>
+        @endif
+
         <div class="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-3 mb-4">
             <h3 class="text-lg font-bold text-gray-700">Daftar Soal</h3>
             <div class="flex flex-col sm:flex-row gap-2">
@@ -19,6 +28,10 @@
                         @endforeach
                     </select>
                 </form>
+                <a href="<?= route('admin.questions.import.form') ?>"
+                    class="inline-flex items-center justify-center gap-2 bg-blue-600 text-white font-semibold px-5 py-2.5 rounded-lg shadow hover:bg-blue-700 transition">
+                    <i class="fa-solid fa-file-import"></i> Import
+                </a>
                 <a href="<?= route('admin.questions.create') ?>"
                     class="inline-flex items-center justify-center gap-2 bg-green-600 text-white font-semibold px-5 py-2.5 rounded-lg shadow hover:bg-green-700 transition">
                     <i class="fa-solid fa-plus"></i> Tambah Soal
@@ -51,9 +64,16 @@
                 <tbody>
                     @forelse ($questions as $i => $q)
                         <?php
-                        $isPg = $q->type === 'pilihan_ganda';
-                        $badge = $isPg ? 'bg-blue-100 text-blue-800' : 'bg-purple-100 text-purple-800';
-                        $label = $isPg ? 'Pilihan Ganda' : 'Essay';
+                        if ($q->type === 'pilihan_ganda') {
+                            $badge = 'bg-blue-100 text-blue-800';
+                            $label = 'Pilihan Ganda';
+                        } elseif ($q->type === 'coding') {
+                            $badge = 'bg-amber-100 text-amber-800';
+                            $label = 'Coding';
+                        } else {
+                            $badge = 'bg-purple-100 text-purple-800';
+                            $label = 'Essay';
+                        }
                         ?>
                         <tr class="hover:bg-gray-50 align-top">
                             <td class="p-3 border"><?= $i + 1 ?></td>

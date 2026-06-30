@@ -25,7 +25,10 @@ Route::middleware('auth')->group(function () {
         Route::get('/dashboard', [DashboardController::class, 'admin'])->name('dashboard');
         Route::resource('users', UserController::class)->except('show');
         Route::resource('subjects', SubjectController::class)->except('show');
-        Route::resource('classes', SchoolClassController::class)->except('show');
+        Route::resource('classes', SchoolClassController::class)->except('show');Route::resource('exams', \App\Http\Controllers\Admin\ExamController::class)->except('show');
+        Route::get('questions/import', [\App\Http\Controllers\Admin\QuestionController::class, 'importForm'])->name('questions.import.form');
+        Route::get('questions/import/template', [\App\Http\Controllers\Admin\QuestionController::class, 'downloadTemplate'])->name('questions.import.template');
+        Route::post('questions/import', [\App\Http\Controllers\Admin\QuestionController::class, 'import'])->name('questions.import');
         Route::resource('questions', \App\Http\Controllers\Admin\QuestionController::class)->except('show');
         Route::post('media/upload', [\App\Http\Controllers\Admin\MediaUploadController::class, 'store'])->name('media.upload');
     });

@@ -20,6 +20,8 @@ class Question extends Model
     'option_d',
     'option_e',
     'correct_option',
+    'language',
+    'starter_code',
     'answer_key',
     'score'
   ];

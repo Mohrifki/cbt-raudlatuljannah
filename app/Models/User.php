@@ -54,6 +54,11 @@ class User extends Authenticatable
 
     public function electiveSubjects()
     {
-        return $this->belongsToMany(Subject::class, 'student_subject', 'user_id', 'subject_id')->withTimestamps();
+        return $this->belongsToMany(
+            \App\Models\Subject::class,
+            'student_subject', // nama tabel pivot
+            'user_id',         // FK user di pivot
+            'subject_id'       // FK subject di pivot
+        );
     }
 }

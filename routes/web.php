@@ -50,6 +50,10 @@ Route::middleware('auth')->group(function () {
     Route::middleware('role:siswa')->prefix('siswa')->name('siswa.')->group(function () {
         Route::get('/dashboard', [DashboardController::class, 'siswa'])->name('dashboard');
     });
+    Route::middleware(['auth', 'role:siswa'])->prefix('siswa')->name('siswa.')->group(function () {
+        Route::get('ujian', [\App\Http\Controllers\Siswa\ExamController::class, 'index'])->name('exams.index');
+        // (Fase 5C-2 nanti: mulai, kerjakan, simpan jawaban, submit)
+    });
 });
 
 require __DIR__ . '/auth.php';

@@ -37,6 +37,7 @@ class QuestionController extends Controller
 
         Question::create([
             'subject_id'     => $data['subject_id'],
+            'grade'          => $request -> input('grade') ? : null,
             'created_by'     => auth()->id(),
             'type'           => $data['type'],
             'question'       => $data['question'],
@@ -68,6 +69,7 @@ class QuestionController extends Controller
 
         $question->update([
             'subject_id'     => $data['subject_id'],
+            'grade'          => $request -> input('grade') ? : null,
             'type'           => $data['type'],
             'question'       => $data['question'],
             'option_a'       => $isPg ? $data['option_a'] : null,
@@ -95,6 +97,7 @@ class QuestionController extends Controller
     {
         return $request->validate([
             'subject_id'     => 'required|exists:subjects,id',
+            'grade'          => 'nullable|in:10,11,12',
             'type'           => 'required|in:pilihan_ganda,essay,coding',
             'question'       => 'required|string',
             'score'          => 'required|integer|min:1',

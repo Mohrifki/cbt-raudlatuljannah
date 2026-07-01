@@ -82,6 +82,8 @@
                                 <?= e(\Illuminate\Support\Str::limit(strip_tags($q->question), 70)) ?></td>
                             <td class="p-3 border whitespace-nowrap"><span
                                     class="px-2 py-1 rounded text-xs font-medium <?= $badge ?>"><?= $label ?></span>
+                                <span
+                                    class="px-2 py-1 rounded text-xs font-medium bg-gray-100 text-gray-700"><?= $q->grade ? 'Kelas ' . $q->grade : 'Semua Tingkat' ?></span>
                             </td>
                             <td class="p-3 border text-center"><?= $q->score ?></td>
                             <td class="p-3 border text-center whitespace-nowrap space-x-2">

@@ -7,32 +7,33 @@ use Illuminate\Database\Eloquent\Model;
 
 class Question extends Model
 {
-  use HasFactory;
+    use HasFactory;
 
-  protected $fillable = [
-    'subject_id',
-    'created_by',
-    'type',
-    'question',
-    'option_a',
-    'option_b',
-    'option_c',
-    'option_d',
-    'option_e',
-    'correct_option',
-    'language',
-    'starter_code',
-    'answer_key',
-    'score'
-  ];
+    protected $fillable = [
+        'subject_id',
+        'grade',
+        'created_by',
+        'type',
+        'question',
+        'option_a',
+        'option_b',
+        'option_c',
+        'option_d',
+        'option_e',
+        'correct_option',
+        'answer_key',
+        'language',
+        'starter_code',
+        'score',
+    ];
 
-  public function subject()
-  {
-    return $this -> belongsTo(subject::class);
-  }
+    public function subject()
+    {
+        return $this->belongsTo(Subject::class);
+    }
 
-  public function creator()
-  {
-    return $this -> belongsTo(User::class, 'created_by');
-  }
+    public function creator()
+    {
+        return $this->belongsTo(User::class, 'created_by');
+    }
 }

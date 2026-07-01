@@ -45,6 +45,9 @@
                                     class="px-2 py-1 rounded text-xs font-medium <?= $statusBadge ?>"><?= ucfirst($exam->status) ?></span>
                             </td>
                             <td class="p-3 border text-center whitespace-nowrap space-x-2">
+                                <a href="<?= route('admin.exams.questions', $exam) ?>"
+                                    class="inline-flex items-center justify-center w-8 h-8 rounded bg-amber-50 text-amber-600 hover:bg-amber-100"
+                                    title="Kelola Soal"><i class="fa-solid fa-list-check"></i></a>
                                 <a href="<?= route('admin.exams.edit', $exam) ?>"
                                     class="inline-flex items-center justify-center w-8 h-8 rounded bg-indigo-50 text-indigo-600 hover:bg-indigo-100"
                                     title="Edit"><i class="fa-solid fa-pen"></i></a>

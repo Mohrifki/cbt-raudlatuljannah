@@ -4,6 +4,9 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\SchoolClass;
+use App\Imports\StudentsImport;
+use App\Exports\StudentsTemplateExport;
+use Maatwebsite\Excel\Facades\Excel;
 use App\Models\Subject;
 use App\Models\User;
 use Illuminate\Http\Request;
@@ -103,5 +106,32 @@ class UserController extends Controller
 
         $user->delete();
         return redirect()->route('admin.users.index')->with('success', 'User berhasil dihapus.');
+    }
+
+    public function importForm()
+    {
+        return view('admin.users.import');
+    }
+
+    public function import(Request $request)
+    {
+        $request->validate([
+            'file' => 'required|file|mimes:xlsx,xls,csv',
+        ]);
+
+        $import = new StudentsImport();
+        Excel::import($import, $request->file('file'));
+
+        $msg = "Import selesai: {$import->created} siswa ditambahkan, {$import->skipped} dilewati.";
+        if (!empty($import->errors)) {
+            $msg .= ' Catatan: ' . implode('; ', array_slice($import->errors, 0, 5));
+        }
+
+        return redirect()->route('admin.users.index')->with('success', $msg);
+    }
+
+    public function importTemplate()
+    {
+        return Excel::download(new StudentsTemplateExport, 'template_import_siswa.xlsx');
     }
 }

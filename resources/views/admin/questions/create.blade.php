@@ -34,6 +34,19 @@
                         @enderror
                     </div>
                     <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1.5">Tingkat / Kelas</label>
+                        <select name="grade"
+                            class="w-full border-gray-300 rounded-lg shadow-sm focus:border-green-500 focus:ring-green-500">
+                            <option value="">Semua Tingkat</option>
+                            <option value="10" <?= old('grade') === '10' ? 'selected' : '' ?>>Kelas 10
+                            </option>
+                            <option value="11" <?= old('grade') === '11' ? 'selected' : '' ?>>Kelas 11
+                            </option>
+                            <option value="12" <?= old('grade') === '12' ? 'selected' : '' ?>>Kelas 12
+                            </option>
+                        </select>
+                    </div>
+                    <div>
                         <label class="block text-sm font-medium text-gray-700 mb-1.5">Tipe Soal</label>
                         <select name="type" id="type-select"
                             class="w-full border-gray-300 rounded-lg shadow-sm focus:border-green-500 focus:ring-green-500">
@@ -63,18 +76,17 @@
                     <p class="text-sm font-medium text-gray-700">Pilihan Jawaban <span
                             class="text-gray-400 font-normal">(klik bulatan di kiri sebagai kunci jawaban)</span></p>
                     @foreach (['a', 'b', 'c', 'd', 'e'] as $opt)
-                        <div class="flex items-center gap-3">
-                            <input type="radio" name="correct_option" value="<?= $opt ?>"
-                                <?= old('correct_option') === $opt ? 'checked' : '' ?>
-                                class="text-green-600 focus:ring-green-500">
+                        <div class="flex items-center gap-2 mb-2">
                             <span
-                                class="w-8 h-8 flex items-center justify-center rounded-full bg-gray-100 font-semibold text-gray-600 uppercase shrink-0"><?= $opt ?></span>
-                            <input type="text" name="option_<?= $opt ?>" value="<?= old('option_' . $opt) ?>"
+                                class="w-7 h-7 flex items-center justify-center rounded-full bg-gray-100 text-gray-600 text-sm font-semibold"><?= strtoupper($opt) ?></span>
+                            <input type="text" name="option_<?= $opt ?>" value="<?= e(old('option_' . $opt)) ?>"
                                 class="flex-1 border-gray-300 rounded-lg shadow-sm focus:border-green-500 focus:ring-green-500"
-                                placeholder="Pilihan <?=
-strtoupper($opt)
-$opt === 'e' ? ' (opsional)' : ''
-?>">
+                                placeholder="Opsi <?= strtoupper($opt) ?>">
+                            <label class="inline-flex items-center gap-1 text-sm text-gray-600 whitespace-nowrap">
+                                <input type="radio" name="correct_option" value="<?= $opt ?>"
+                                    <?= old('correct_option') === $opt ? 'checked' : '' ?>
+                                    class="text-green-600 focus:ring-green-500"> Benar
+                            </label>
                         </div>
                     @endforeach
                     @error('correct_option')
@@ -120,8 +132,10 @@ $opt === 'e' ? ' (opsional)' : ''
                             <option value="javascript" <?= old('language') === 'javascript' ? 'selected' : '' ?>>
                                 JavaScript</option>
                             <option value="c" <?= old('language') === 'c' ? 'selected' : '' ?>>C</option>
-                            <option value="cpp" <?= old('language') === 'cpp' ? 'selected' : '' ?>>C++</option>
-                            <option value="java" <?= old('language') === 'java' ? 'selected' : '' ?>>Java</option>
+                            <option value="cpp" <?= old('language') === 'cpp' ? 'selected' : '' ?>>C++
+                            </option>
+                            <option value="java" <?= old('language') === 'java' ? 'selected' : '' ?>>Java
+                            </option>
                         </select>
                         @error('language')
                             <p class="text-red-600 text-sm mt-1"><?= $message ?></p>

@@ -23,9 +23,17 @@ Route::middleware('auth')->group(function () {
     // === AREA ADMIN ===
     Route::middleware('role:admin')->prefix('admin')->name('admin.')->group(function () {
         Route::get('/dashboard', [DashboardController::class, 'admin'])->name('dashboard');
+        Route::get('users/import', [\App\Http\Controllers\Admin\UserController::class, 'importForm'])->name('users.import');
+        Route::post('users/import', [\App\Http\Controllers\Admin\UserController::class, 'import'])->name('users.import.store');
+        Route::get('users/import/template', [\App\Http\Controllers\Admin\UserController::class, 'importTemplate'])->name('users.import.template');
         Route::resource('users', UserController::class)->except('show');
         Route::resource('subjects', SubjectController::class)->except('show');
-        Route::resource('classes', SchoolClassController::class)->except('show');Route::resource('exams', \App\Http\Controllers\Admin\ExamController::class)->except('show');
+        Route::get('classes/{class}/students', [\App\Http\Controllers\Admin\SchoolClassController::class, 'students'])->name('classes.students');
+        Route::post('classes/{class}/students', [\App\Http\Controllers\Admin\SchoolClassController::class, 'syncStudents'])->name('classes.students.sync');
+        Route::resource('classes', SchoolClassController::class)->except('show');
+        Route::resource('exams', \App\Http\Controllers\Admin\ExamController::class)->except('show');
+        Route::get('exams/{exam}/questions', [\App\Http\Controllers\Admin\ExamController::class, 'questions'])->name('exams.questions');
+        Route::post('exams/{exam}/questions', [\App\Http\Controllers\Admin\ExamController::class, 'syncQuestions'])->name('exams.questions.sync');
         Route::get('questions/import', [\App\Http\Controllers\Admin\QuestionController::class, 'importForm'])->name('questions.import.form');
         Route::get('questions/import/template', [\App\Http\Controllers\Admin\QuestionController::class, 'downloadTemplate'])->name('questions.import.template');
         Route::post('questions/import', [\App\Http\Controllers\Admin\QuestionController::class, 'import'])->name('questions.import');

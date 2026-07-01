@@ -14,6 +14,7 @@ class Exam extends Model
     'subject_id',
     'description',
     'type',
+    'grade',
     'duration',
     'start_at',
     'end_at',

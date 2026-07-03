@@ -14,16 +14,16 @@ class ExamAttempt extends Model
     'question_order' => 'array',
   ];
 
-  public function exam()
-  {
-    return $this->belongsTo(Exam::class);
-  }
   public function user()
   {
-    return $this->belongsTo(User::class);
+    return $this->belongsTo(\App\Models\User::class, 'user_id');
+  }
+  public function exam()
+  {
+    return $this->belongsTo(\App\Models\Exam::class, 'exam_id');
   }
   public function answers()
   {
-    return $this->hasMany(ExamAnswer::class, 'attempt_id');
+    return $this->hasMany(\App\Models\ExamAnswer::class, 'attempt_id');
   }
 }

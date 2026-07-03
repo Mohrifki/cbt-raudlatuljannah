@@ -7,6 +7,7 @@ use App\Http\Controllers\Admin\SubjectController;
 use App\Http\Controllers\Admin\SchoolClassController;
 use App\Http\Controllers\Admin\PlotSessionController;
 use App\Http\Controllers\Admin\UserController;
+use App\Http\Controllers\Admin\GradingController;
 
 Route::get('/', function () {
     return view('welcome');
@@ -29,7 +30,10 @@ Route::middleware('auth')->group(function () {
         Route::get('users/import', [\App\Http\Controllers\Admin\UserController::class, 'importForm'])->name('users.import');
         Route::post('users/import', [\App\Http\Controllers\Admin\UserController::class, 'import'])->name('users.import.store');
         Route::get('users/import/template', [\App\Http\Controllers\Admin\UserController::class, 'importTemplate'])->name('users.import.template');
-        
+        Route::get('grading', [GradingController::class, 'index'])->name('grading.index');
+        Route::get('grading/{attempt}', [GradingController::class, 'show'])->name('grading.show');
+        Route::put('grading/{attempt}', [GradingController::class, 'update'])->name('grading.update');
+
         // ===== JADWAL PLOT (route baru) =====
         Route::get('plot-sessions',                  [PlotSessionController::class, 'index'])->name('plot-sessions.index');
         Route::post('plot-sessions',                 [PlotSessionController::class, 'store'])->name('plot-sessions.store');
@@ -40,7 +44,7 @@ Route::middleware('auth')->group(function () {
         // ⚠️ WAJIB di ATAS baris Route::resource('users', ...)
         Route::get('users/{user}/plot', [\App\Http\Controllers\Admin\UserController::class, 'plotForm'])->name('users.plot');
         Route::put('users/{user}/plot', [\App\Http\Controllers\Admin\UserController::class, 'plotStore'])->name('users.plot.store');
-        
+
         Route::resource('users', UserController::class)->except('show');
         Route::resource('subjects', SubjectController::class)->except('show');
         Route::get('classes/{class}/students', [\App\Http\Controllers\Admin\SchoolClassController::class, 'students'])->name('classes.students');
@@ -71,7 +75,7 @@ Route::middleware('auth')->group(function () {
         Route::get('ujian/{exam}/kerjakan',    [\App\Http\Controllers\Siswa\ExamController::class, 'work'])->name('exams.work');
         Route::post('ujian/{exam}/jawab',      [\App\Http\Controllers\Siswa\ExamController::class, 'saveAnswer'])->name('exams.answer');
         Route::post('ujian/{exam}/kumpulkan',  [\App\Http\Controllers\Siswa\ExamController::class, 'submit'])->name('exams.submit');
-        Route::post('ujian/{exam}/pelanggaran',[\App\Http\Controllers\Siswa\ExamController::class, 'violation'])->name('exams.violation');
+        Route::post('ujian/{exam}/pelanggaran', [\App\Http\Controllers\Siswa\ExamController::class, 'violation'])->name('exams.violation');
         Route::get('ujian/{exam}/hasil',       [\App\Http\Controllers\Siswa\ExamController::class, 'result'])->name('exams.result');
         // (Fase 5C-2 nanti: mulai, kerjakan, simpan jawaban, submit)
     });

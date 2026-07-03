@@ -11,5 +11,5 @@ class ExamAnswer extends Model
     protected $casts = ['is_correct' => 'boolean'];
 
     public function attempt()  { return $this->belongsTo(ExamAttempt::class, 'attempt_id'); }
-    public function question() { return $this->belongsTo(Question::class); }
+    public function question() { return $this->belongsTo(Question::class, 'question_id'); }
 }

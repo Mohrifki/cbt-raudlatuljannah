@@ -3,8 +3,8 @@
 namespace App\Imports;
 
 use App\Models\User;
-use App\Models\SchoolClass;
 use App\Models\Subject;
+use App\Models\SchoolClass;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Hash;
 use Maatwebsite\Excel\Concerns\ToCollection;
@@ -12,55 +12,69 @@ use Maatwebsite\Excel\Concerns\WithHeadingRow;
 
 class StudentsImport implements ToCollection, WithHeadingRow
 {
-    public int $created = 0;
-    public int $skipped = 0;
-    public array $errors = [];
+  public int $created = 0;      // 👈 dipakai import()
+  public int $skipped = 0;      // 👈 dipakai import()
+  public array $errors = [];    // 👈 dipakai import()
 
-    public function collection(Collection $rows)
-    {
-        foreach ($rows as $i => $row) {
-            $baris = $i + 2; // +1 header, +1 index mulai 0
-            $name  = trim((string) ($row['name'] ?? ''));
-            $email = trim((string) ($row['email'] ?? ''));
+  public function collection(Collection $rows)
+  {
+    foreach ($rows as $i => $row) {
+      $baris = $i + 2; // +2: baris header + index mulai 0
 
-            if ($name === '' || $email === '') {
-                $this->skipped++;
-                $this->errors[] = "Baris {$baris}: name/email kosong";
-                continue;
-            }
-            if (User::where('email', $email)->exists()) {
-                $this->skipped++;
-                $this->errors[] = "Baris {$baris}: email {$email} sudah terdaftar";
-                continue;
-            }
+      // lewati baris kosong
+      if (blank($row['name'] ?? null) || blank($row['email'] ?? null)) {
+        $this->skipped++;
+        continue;
+      }
 
-            // Petakan kelas berdasarkan NAMA kelas (mis. "X-A")
-            $classId = null;
-            $kelas = trim((string) ($row['kelas'] ?? ''));
-            if ($kelas !== '') {
-                $c = SchoolClass::where('name', $kelas)->first();
-                $classId = $c?->id;
-                if (!$c) $this->errors[] = "Baris {$baris}: kelas \"{$kelas}\" tidak ditemukan (dikosongkan)";
-            }
+      // cari kelas
+      $class = SchoolClass::where('name', trim($row['kelas'] ?? ''))->first();
+      if (!$class) {
+        $this->skipped++;
+        $this->errors[] = "Baris {$baris}: kelas '" . ($row['kelas'] ?? '-') . "' tidak ditemukan";
+        continue;
+      }
 
-            $user = User::create([
-                'name'     => $name,
-                'email'    => $email,
-                'password' => Hash::make(trim((string) ($row['password'] ?? '')) ?: 'password'),
-                'nis'      => trim((string) ($row['nis'] ?? '')) ?: null,
-                'class_id' => $classId,
-            ]);
-            $user->assignRole('siswa');
+      // buat / update siswa (password lama tidak tertimpa)
+      $user  = User::firstOrNew(['email' => trim($row['email'])]);
+      $isNew = !$user->exists;
 
-            // Mapel peminatan (opsional, pisah dengan koma). Mis: "Informatika X, Biologi X"
-            $peminatan = trim((string) ($row['peminatan'] ?? ''));
-            if ($peminatan !== '') {
-                $names = array_filter(array_map('trim', explode(',', $peminatan)));
-                $ids = Subject::whereIn('name', $names)->where('type', 'pilihan')->pluck('id')->all();
-                if (!empty($ids)) $user->electiveSubjects()->sync($ids);
-            }
+      $user->name     = trim($row['name']);
+      $user->nis      = $row['nis'] ?? null;
+      $user->class_id = $class->id;
+      if ($isNew || filled($row['password'] ?? null)) {
+        $user->password = Hash::make(($row['password'] ?? '') ?: 'password');
+      }
+      $user->save();
 
-            $this->created++;
+      if (!$user->hasRole('siswa')) {
+        $user->assignRole('siswa');
+      }
+
+      // ===== PEMINATAN (Plot 1–4) — hanya kelas XI & XII =====
+      if (in_array($class->grade, ['XI', 'XII'], true)) {
+        $sync = [];
+        foreach ([1, 2, 3, 4] as $p) {
+          $namaMapel = trim($row['plot' . $p] ?? '');
+          if ($namaMapel === '') continue;
+
+          $subject = Subject::where('type', 'pilihan')
+            ->where('name', $namaMapel)->first();
+
+          if ($subject) {
+            $sync[$subject->id] = ['plot' => $p];
+          } else {
+            $this->errors[] = "Baris {$baris}: mapel '{$namaMapel}' (plot{$p}) tidak ditemukan";
+          }
         }
+        if (!empty($sync)) {
+          $user->electiveSubjects()->sync($sync);
+        }
+      }
+
+      if ($isNew) {
+        $this->created++;
+      }
     }
+  }
 }

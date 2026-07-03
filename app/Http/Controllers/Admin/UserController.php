@@ -12,6 +12,7 @@ use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Spatie\Permission\Models\Role;
+use Illuminate\Support\Facades\Storage;
 
 class UserController extends Controller
 {
@@ -32,6 +33,7 @@ class UserController extends Controller
     public function store(Request $request)
     {
         $request->validate([
+            'photo'               => 'nullable|image|mimes:jpg,jpeg,png|max:2048',
             'name'                => 'required|string|max:255',
             'email'               => 'required|email|unique:users,email',
             'password'            => 'required|min:6',
@@ -53,7 +55,9 @@ class UserController extends Controller
         ]);
 
         $user->assignRole($request->role);
-
+        if ($request->hasFile('photo')) {
+            $user->update(['photo' => $request->file('photo')->store('siswa', 'public')]);
+        }
         // Simpan mapel pilihan hanya untuk siswa
         $user->electiveSubjects()->sync($isSiswa ? ($request->elective_subjects ?? []) : []);
 
@@ -71,6 +75,7 @@ class UserController extends Controller
     public function update(Request $request, User $user)
     {
         $request->validate([
+            'photo'               => 'nullable|image|mimes:jpg,jpeg,png|max:2048',
             'name'                => 'required|string|max:255',
             'email'               => 'required|email|unique:users,email,' . $user->id,
             'password'            => 'nullable|min:6',
@@ -90,10 +95,29 @@ class UserController extends Controller
         if ($request->filled('password')) {
             $user->password = Hash::make($request->password);
         }
+
+        // Foto — hapus lama, simpan baru (hanya jika ada upload)
+        if ($request->hasFile('photo')) {
+            if ($user->photo) {
+                Storage::disk('public')->delete($user->photo);
+            }
+            $user->photo = $request->file('photo')->store('siswa', 'public');
+        }
         $user->save();
 
         $user->syncRoles([$request->role]);
-        $user->electiveSubjects()->sync($isSiswa ? ($request->elective_subjects ?? []) : []);
+        if ($isSiswa) {
+            // ambil plot yang sudah tersimpan: [subject_id => plot]
+            $existing = $user->electiveSubjects()->get()->pluck('pivot.plot', 'id')->toArray();
+
+            $sync = [];
+            foreach ($request->input('elective_subjects', []) as $sid) {
+                $sync[$sid] = ['plot' => $existing[$sid] ?? null]; // pertahankan plot lama
+            }
+            $user->electiveSubjects()->sync($sync);
+        } else {
+            $user->electiveSubjects()->detach(); // kalau role diubah jadi non-siswa
+        }
 
         return redirect()->route('admin.users.index')->with('success', 'User berhasil diperbarui.');
     }
@@ -133,5 +157,76 @@ class UserController extends Controller
     public function importTemplate()
     {
         return Excel::download(new StudentsTemplateExport, 'template_import_siswa.xlsx');
+    }
+
+    public function photoImportForm()
+    {
+        return view('admin.users.photo-import');
+    }
+
+    public function photoImport(Request $request)
+    {
+        $request->validate([
+            'photos'   => 'required|array',
+            'photos.*' => 'image|mimes:jpg,jpeg,png|max:2048',
+        ]);
+
+        $matched = 0;
+        $unmatched = [];
+
+        foreach ($request->file('photos') as $file) {
+            // Nama file (tanpa ekstensi) = NIS. Contoh: 2024001.jpg
+            $nis = pathinfo($file->getClientOriginalName(), PATHINFO_FILENAME);
+            $user = User::where('nis', $nis)->first();
+
+            if (!$user) {
+                $unmatched[] = $nis;
+                continue;
+            }
+
+            if ($user->photo) {
+                Storage::disk('public')->delete($user->photo);
+            }
+            $user->update(['photo' => $file->store('siswa', 'public')]);
+            $matched++;
+        }
+
+        $msg = "Import foto selesai: {$matched} foto berhasil dicocokkan.";
+        if (!empty($unmatched)) {
+            $msg .= ' Tidak ketemu NIS: ' . implode(', ', array_slice($unmatched, 0, 10)) . (count($unmatched) > 10 ? ' ...' : '');
+        }
+
+        return redirect()->route('admin.users.index')->with('success', $msg);
+    }
+
+    public function plotForm(User $user)
+    {
+        $subjects = Subject::where('type', 'pilihan')->orderBy('name')->get();
+        $current  = $user->electiveSubjects()->get()->mapWithKeys(fn($s) => [$s->pivot->plot => $s->id]);
+        return view('admin.users.plot', compact('user', 'subjects', 'current'));
+    }
+
+    public function plotStore(Request $request, User $user)
+    {
+        $request->validate([
+            'plot_1' => 'nullable|exists:subjects,id',
+            'plot_2' => 'nullable|exists:subjects,id',
+            'plot_3' => 'nullable|exists:subjects,id',
+            'plot_4' => 'nullable|exists:subjects,id',
+        ]);
+
+        $chosen = array_filter([$request->plot_1, $request->plot_2, $request->plot_3, $request->plot_4]);
+        if (count($chosen) !== count(array_unique($chosen))) {
+            return back()->withErrors(['plot' => 'Mapel tidak boleh sama antar plot.'])->withInput();
+        }
+
+        $sync = [];
+        foreach ([1, 2, 3, 4] as $p) {
+            $sid = $request->input('plot_' . $p);
+            if ($sid) $sync[$sid] = ['plot' => $p];
+        }
+        $user->electiveSubjects()->sync($sync);
+
+        return redirect()->route('admin.users.index')->with('success', 'Plot peminatan ' . $user->name . ' disimpan.');
     }
 }

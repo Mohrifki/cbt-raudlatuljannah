@@ -5,6 +5,7 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\Admin\SubjectController;
 use App\Http\Controllers\Admin\SchoolClassController;
+use App\Http\Controllers\Admin\PlotSessionController;
 use App\Http\Controllers\Admin\UserController;
 
 Route::get('/', function () {
@@ -23,9 +24,23 @@ Route::middleware('auth')->group(function () {
     // === AREA ADMIN ===
     Route::middleware('role:admin')->prefix('admin')->name('admin.')->group(function () {
         Route::get('/dashboard', [DashboardController::class, 'admin'])->name('dashboard');
+        Route::get('users/photos/import', [\App\Http\Controllers\Admin\UserController::class, 'photoImportForm'])->name('users.photos.import');
+        Route::post('users/photos/import', [\App\Http\Controllers\Admin\UserController::class, 'photoImport'])->name('users.photos.import.store');
         Route::get('users/import', [\App\Http\Controllers\Admin\UserController::class, 'importForm'])->name('users.import');
         Route::post('users/import', [\App\Http\Controllers\Admin\UserController::class, 'import'])->name('users.import.store');
         Route::get('users/import/template', [\App\Http\Controllers\Admin\UserController::class, 'importTemplate'])->name('users.import.template');
+        
+        // ===== JADWAL PLOT (route baru) =====
+        Route::get('plot-sessions',                  [PlotSessionController::class, 'index'])->name('plot-sessions.index');
+        Route::post('plot-sessions',                 [PlotSessionController::class, 'store'])->name('plot-sessions.store');
+        Route::put('plot-sessions/{plotSession}',    [PlotSessionController::class, 'update'])->name('plot-sessions.update');
+        Route::delete('plot-sessions/{plotSession}', [PlotSessionController::class, 'destroy'])->name('plot-sessions.destroy');
+
+        // ===== ATUR PLOT PEMINATAN SISWA (route baru) =====
+        // ⚠️ WAJIB di ATAS baris Route::resource('users', ...)
+        Route::get('users/{user}/plot', [\App\Http\Controllers\Admin\UserController::class, 'plotForm'])->name('users.plot');
+        Route::put('users/{user}/plot', [\App\Http\Controllers\Admin\UserController::class, 'plotStore'])->name('users.plot.store');
+        
         Route::resource('users', UserController::class)->except('show');
         Route::resource('subjects', SubjectController::class)->except('show');
         Route::get('classes/{class}/students', [\App\Http\Controllers\Admin\SchoolClassController::class, 'students'])->name('classes.students');
@@ -51,7 +66,13 @@ Route::middleware('auth')->group(function () {
         Route::get('/dashboard', [DashboardController::class, 'siswa'])->name('dashboard');
     });
     Route::middleware(['auth', 'role:siswa'])->prefix('siswa')->name('siswa.')->group(function () {
-        Route::get('ujian', [\App\Http\Controllers\Siswa\ExamController::class, 'index'])->name('exams.index');
+        Route::get('ujian',                    [\App\Http\Controllers\Siswa\ExamController::class, 'index'])->name('exams.index');
+        Route::get('ujian/{exam}/mulai',       [\App\Http\Controllers\Siswa\ExamController::class, 'start'])->name('exams.start');
+        Route::get('ujian/{exam}/kerjakan',    [\App\Http\Controllers\Siswa\ExamController::class, 'work'])->name('exams.work');
+        Route::post('ujian/{exam}/jawab',      [\App\Http\Controllers\Siswa\ExamController::class, 'saveAnswer'])->name('exams.answer');
+        Route::post('ujian/{exam}/kumpulkan',  [\App\Http\Controllers\Siswa\ExamController::class, 'submit'])->name('exams.submit');
+        Route::post('ujian/{exam}/pelanggaran',[\App\Http\Controllers\Siswa\ExamController::class, 'violation'])->name('exams.violation');
+        Route::get('ujian/{exam}/hasil',       [\App\Http\Controllers\Siswa\ExamController::class, 'result'])->name('exams.result');
         // (Fase 5C-2 nanti: mulai, kerjakan, simpan jawaban, submit)
     });
 });

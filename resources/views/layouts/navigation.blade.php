@@ -5,7 +5,6 @@
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="flex justify-between items-center h-16">
                 <a href="<?= route('dashboard') ?>" class="flex items-center gap-2.5">
-                    <!-- SEBELUM: logosekolah.jpg (gedung) -->
                     <img src="<?= asset('images/logo.png') ?>" alt="Logo" class="h-10 w-10 object-contain">
                     <span class="font-bold text-gray-800 text-lg">CBT <span class="text-green-600">Smaradja</span></span>
                 </a>
@@ -36,9 +35,15 @@
                     </button>
                 </div>
                 <div class="flex items-center gap-3">
-                    <div
-                        class="w-11 h-11 rounded-full bg-white/20 flex items-center justify-center font-bold ring-2 ring-white/30">
-                        <?= strtoupper(mb_substr($u->name, 0, 1)) ?></div>
+                    <?php $fotoNav = $u->photo ? asset('storage/' . $u->photo) : null; ?>
+                    @if ($fotoNav)
+                        <img src="<?= $fotoNav ?>" alt="Foto"
+                            class="w-11 h-11 rounded-full object-cover ring-2 ring-white/30">
+                    @else
+                        <div
+                            class="w-11 h-11 rounded-full bg-white/20 flex items-center justify-center font-bold ring-2 ring-white/30">
+                            <?= strtoupper(mb_substr($u->name, 0, 1)) ?></div>
+                    @endif
                     <div class="min-w-0">
                         <p class="font-medium text-sm truncate"><?= e($u->name) ?></p>
                         <p class="text-xs text-green-50 truncate"><?= e($u->email) ?></p>

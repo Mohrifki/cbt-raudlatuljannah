@@ -4,6 +4,12 @@
 @tailwind components;
 @tailwind utilities;
 
+[x-cloak] {
+    display: none !important;
+}
+
 html {
-    font-size: 15px; /* default 16px -> sedikit lebih kecil; pakai 14px kalau mau lebih kecil lagi */
+
+    font-size: 15px;
+    /* default 16px -> sedikit lebih kecil; pakai 14px kalau mau lebih kecil lagi */
 }

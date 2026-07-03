@@ -14,16 +14,20 @@ class DashboardController extends Controller
 {
     public function index()
     {
-        /** @var \App\Models\User $user */
-        $user = auth()->user();
+        /** @var \App\Models\User $u */
+        $u = auth()->user();
 
-        if ($user->hasRole('admin')) {
-            return redirect()->route('admin.dashboard');
+        if ($u->hasRole('admin')) {
+            return redirect('/admin/dashboard');
         }
-        if ($user->hasRole('guru')) {
-            return redirect()->route('guru.dashboard');
+        if ($u->hasRole('siswa')) {
+            return redirect('/siswa/dashboard');
         }
-        return redirect()->route('siswa.dashboard');
+        if ($u->hasRole('guru')) {
+            return redirect('/guru/dashboard');
+        }
+
+        abort(403);
     }
 
     public function admin()

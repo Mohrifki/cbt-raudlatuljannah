@@ -168,6 +168,11 @@
             <a href="<?= route('admin.subjects.index') ?>" data-label="Mata Pelajaran"
                 class="nav-link <?= $active('admin.subjects.*') ?>"><i class="fa-solid fa-book"></i><span
                     class="nav-label">Mata Pelajaran</span></a>
+            <a href="<?= route('admin.plot-sessions.index') ?>"
+                class="flex items-center gap-3 px-4 py-2.5 rounded-lg text-sm font-medium text-gray-600 hover:bg-gray-100 <?= request()->routeIs('admin.plot-sessions.*') ? 'bg-green-50 text-green-700' : '' ?>">
+                <i class="fa-solid fa-layer-group w-5 text-center"></i>
+                Jadwal Plot
+            </a>
             <a href="<?= route('admin.classes.index') ?>" data-label="Kelas"
                 class="nav-link <?= $active('admin.classes.*') ?>"><i class="fa-solid fa-chalkboard-user"></i><span
                     class="nav-label">Kelas</span></a>

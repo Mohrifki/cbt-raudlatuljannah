@@ -14,7 +14,8 @@
                 </div>
             </div>
 
-            <form action="<?= route('admin.users.store') ?>" method="POST" class="p-6 space-y-5">
+            <form action="<?= route('admin.users.store') ?>" method="POST" enctype="multipart/form-data"
+                class="p-6 space-y-5">
                 @csrf
 
                 <div>
@@ -71,7 +72,23 @@
                 </div>
 
                 <!-- ====== DATA SISWA (muncul saat role = Siswa) ====== -->
-                <div id="siswa-fields" class="rounded-xl border border-dashed border-green-300 bg-green-50/50 p-4">
+                <div class="sm:col-span-2">
+                    <label class="block text-sm font-medium text-gray-700 mb-1.5">Foto Siswa</label>
+                    <div class="flex items-center gap-4">
+                        <?php $fotoLama = $user->photo ?? null ? asset('storage/' . $user->photo) : null; ?>
+                        <img id="preview-foto"
+                            src="<?= $fotoLama ?: 'https://placehold.co/80x80/e2e8f0/94a3b8?text=Foto' ?>"
+                            class="w-20 h-20 rounded-xl object-cover border border-gray-200">
+                        <input type="file" name="photo" accept="image/*"
+                            onchange="document.getElementById('preview-foto').src = window.URL.createObjectURL(this.files[0])"
+                            class="text-sm file:mr-3 file:py-2 file:px-4 file:rounded-lg file:border-0 file:bg-green-600 file:text-white hover:file:bg-green-700">
+                    </div>
+                    @error('photo')
+                        <p class="text-red-600 text-sm mt-1"><?= $message ?></p>
+                    @enderror
+                </div>
+                <div id="siswa-fields" x-data="{ grade: '' }" x-init="$nextTick(() => grade = $refs.kelas?.selectedOptions[0]?.dataset.grade || '')"
+                    class="rounded-xl border border-dashed border-green-300 bg-green-50/50 p-4">
                     <p class="text-sm font-semibold text-green-700 mb-3 flex items-center gap-2"><i
                             class="fa-solid fa-graduation-cap"></i> Data Siswa</p>
                     <div class="grid grid-cols-1 sm:grid-cols-2 gap-5">
@@ -93,8 +110,9 @@
                             <div class="relative">
                                 <span class="absolute inset-y-0 left-0 flex items-center pl-3 text-gray-400"><i
                                         class="fa-solid fa-school"></i></span>
-                                <select name="class_id"
-                                    class="w-full pl-10 border-gray-300 rounded-lg shadow-sm focus:border-green-500 focus:ring-green-500">
+                                <select name="class_id" x-ref="kelas"
+                                    x-on:change="grade = $event.target.selectedOptions[0]?.dataset.grade || ''"
+                                    class="w-full pl-10 border-gray-300 rounded-lg shadow-sm focus:border-green-500 ...">
                                     <option value="">— Pilih Kelas —</option>
                                     @foreach ($classes as $class)
                                         <option value="<?= $class->id ?>"
@@ -109,9 +127,9 @@
                         </div>
                     </div>
 
-                    <div class="mt-5">
-                        <label class="block text-sm font-medium text-gray-700 mb-2"><i
-                                class="fa-solid fa-list-check text-green-600"></i> Mapel Pilihan (Peminatan)</label>
+                    <div class="mt-5" x-show="grade === 'XI' || grade === 'XII'" x-cloak>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">
+                            <i class="fa-solid fa-list-check text-green-600"></i> Mapel Pilihan (Peminatan)</label>
                         @if ($electives->isEmpty())
                             <p class="text-sm text-gray-400">Belum ada mapel bertipe "pilihan". Tambahkan dulu di menu
                                 Mata Pelajaran.</p>
@@ -120,7 +138,8 @@
                                 @foreach ($electives as $elective)
                                     <label
                                         class="flex items-center gap-2 px-3 py-2 bg-white border rounded-lg cursor-pointer hover:bg-green-50">
-                                        <input type="checkbox" name="elective_subjects[]" value="<?= $elective->id ?>"
+                                        <input type="checkbox" name="elective_subjects[]"
+                                            value="<?= $elective->id ?>"
                                             <?= in_array($elective->id, old('elective_subjects', [])) ? 'checked' : '' ?>
                                             class="rounded border-gray-300 text-green-600 focus:ring-green-500">
                                         <span class="text-sm text-gray-700"><?= e($elective->name) ?></span>

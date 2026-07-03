@@ -21,6 +21,7 @@ class User extends Authenticatable
      */
     protected $fillable = [
         'name',
+        'photo',
         'email',
         'password',
         'nis',
@@ -54,11 +55,7 @@ class User extends Authenticatable
 
     public function electiveSubjects()
     {
-        return $this->belongsToMany(
-            \App\Models\Subject::class,
-            'student_subject', // nama tabel pivot
-            'user_id',         // FK user di pivot
-            'subject_id'       // FK subject di pivot
-        );
+        return $this->belongsToMany(Subject::class, 'student_subject', 'user_id', 'subject_id')
+            ->withPivot('plot');
     }
 }

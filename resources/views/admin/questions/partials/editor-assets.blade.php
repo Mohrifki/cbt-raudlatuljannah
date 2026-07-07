@@ -18,27 +18,27 @@
         font-size: 0.95rem;
     }
 
-    .ql-toolbar.ql-snow,
+     .ql-toolbar.ql-snow,
     .ql-container.ql-snow {
         border-color: #d1d5db;
     }
 
-    .ql-toolbar.ql-snow {
+     .ql-toolbar.ql-snow {
         border-top-left-radius: 0.5rem;
         border-top-right-radius: 0.5rem;
     }
 
-    .ql-container.ql-snow {
+     .ql-container.ql-snow {
         border-bottom-left-radius: 0.5rem;
         border-bottom-right-radius: 0.5rem;
     }
 
-    .ql-editor img,
+     .ql-editor img,
     .ql-editor video {
         max-width: 100%;
     }
 
-    math-field {
+     math-field {
         width: 100%;
         font-size: 1.4rem;
         padding: 10px;
@@ -46,7 +46,7 @@
         border-radius: 0.5rem;
     }
 
-    .CodeMirror {
+     .CodeMirror {
         border: 1px solid #d1d5db;
         border-radius: 0.5rem;
         height: 280px;
@@ -89,10 +89,9 @@
 <script>
     (function() {
         const CSRF = '<?= csrf_token() ?>';
-        const UPLOAD_URL = '<?= route('admin.media.upload') ?>';
+        const UPLOAD_URL = '<?= route((request()->routeIs('guru.*') ? 'guru' : 'admin') . '.media.upload') ?>';
         const BlockEmbed = Quill.import('blots/block/embed');
         let cmEditor = null;
-
         class AudioBlot extends BlockEmbed {
             static create(url) {
                 const n = super.create();
@@ -108,7 +107,6 @@
         AudioBlot.blotName = 'audio';
         AudioBlot.tagName = 'audio';
         Quill.register(AudioBlot);
-
         class VideoFileBlot extends BlockEmbed {
             static create(url) {
                 const n = super.create();
@@ -124,7 +122,6 @@
         VideoFileBlot.blotName = 'videofile';
         VideoFileBlot.tagName = 'video';
         Quill.register(VideoFileBlot);
-
         async function uploadFile(file) {
             const fd = new FormData();
             fd.append('file', file);
@@ -142,7 +139,6 @@
             }
             return (await res.json()).location;
         }
-
         function pickAndUpload(accept, onDone) {
             const input = document.createElement('input');
             input.type = 'file';
@@ -154,7 +150,6 @@
             };
             input.click();
         }
-
         function initQuill(editorSel, hiddenSel) {
             const hidden = document.querySelector(hiddenSel);
             const quill = new Quill(editorSel, {
@@ -188,7 +183,6 @@
             quill.getModule('toolbar').addHandler('formula', function() {
                 if (window.__openMath) window.__openMath(quill);
             });
-
             const container = document.querySelector(editorSel).parentElement;
             const bar = document.createElement('div');
             bar.className = 'flex gap-2 mt-2';
@@ -205,7 +199,6 @@
                 const r = quill.getSelection(true);
                 quill.insertEmbed(r.index, 'videofile', url, 'user');
             }));
-
             const sync = () => {
                 hidden.value = quill.root.innerHTML;
             };
@@ -214,7 +207,6 @@
             const form = hidden.closest('form');
             if (form) form.addEventListener('submit', sync);
         }
-
         function initCodeEditor() {
             const ta = document.getElementById('starter-code');
             if (!ta || typeof CodeMirror === 'undefined') return;
@@ -246,7 +238,6 @@
             const form = ta.closest('form');
             if (form) form.addEventListener('submit', () => cmEditor.save());
         }
-
         document.addEventListener('DOMContentLoaded', function() {
             if (window.MathfieldElement) {
                 MathfieldElement.fontsDirectory = 'https://cdn.jsdelivr.net/npm/mathlive/dist/fonts';
@@ -255,12 +246,10 @@
             if (window.mathVirtualKeyboard) {
                 window.mathVirtualKeyboard.layouts = ['numeric', 'symbols', 'greek', 'alphabetic'];
             }
-
             const mathModal = document.getElementById('math-modal');
             const mathInput = document.getElementById('math-input');
             let activeQuill = null,
                 savedRange = null;
-
             window.__openMath = function(quill) {
                 activeQuill = quill;
                 savedRange = quill.getSelection();
@@ -272,7 +261,6 @@
                     if (window.mathVirtualKeyboard) window.mathVirtualKeyboard.show();
                 }, 80);
             };
-
             function closeMath() {
                 mathModal.style.display = 'none';
             }
@@ -310,17 +298,14 @@
                     mathInput.focus();
                 });
             });
-
             if (document.querySelector('#question-editor')) initQuill('#question-editor',
-            '#question-input');
+                '#question-input');
             if (document.querySelector('#answer-editor')) initQuill('#answer-editor', '#answer-input');
             initCodeEditor();
-
             const typeSel = document.getElementById('type-select');
             const pg = document.getElementById('pg-options');
             const essay = document.getElementById('essay-answer');
             const coding = document.getElementById('coding-fields');
-
             function toggle() {
                 const t = typeSel.value;
                 if (pg) pg.style.display = (t === 'pilihan_ganda') ? '' : 'none';

@@ -2,6 +2,7 @@
     <x-slot name="header">
         <h2 class="font-semibold text-xl text-gray-800 leading-tight">Penilaian Esai & Coding</h2>
     </x-slot>
+    <?php $rp = request()->routeIs('guru.*') ? 'guru' : 'admin'; ?>
 
     <div class="py-8">
         <div class="max-w-7xl mx-auto sm:px-6 lg:px-8" x-data="{ tab: 'perlu' }">
@@ -61,7 +62,7 @@
                                                 </span>
                                             </td>
                                             <td class="py-3 px-4 border-b border-gray-100 text-center">
-                                                <a href="<?= route('admin.grading.show', $attempt) ?>"
+                                                <a href="<?= route($rp . '.grading.show', $attempt) ?>"
                                                     class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-green-600 text-white text-xs font-medium hover:bg-green-700 transition">
                                                     <i class="fa-solid fa-pen"></i> Nilai
                                                 </a>
@@ -113,7 +114,7 @@
                                                 </span>
                                             </td>
                                             <td class="py-3 px-4 border-b border-gray-100 text-center">
-                                                <a href="<?= route('admin.grading.show', $attempt) ?>"
+                                                <a href="<?= route($rp . '.grading.show', $attempt) ?>"
                                                     class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-gray-100 text-gray-700 text-xs font-medium hover:bg-gray-200 transition">
                                                     <i class="fa-solid fa-eye"></i> Lihat / Edit
                                                 </a>

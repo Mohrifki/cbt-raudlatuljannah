@@ -8,9 +8,7 @@ use App\Models\SchoolClass;
 use App\Models\Subject;
 use App\Models\Exam;
 use App\Models\ExamAttempt;
-use App\Models\Question;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Schema;
 
 class DashboardController extends Controller
 {
@@ -42,40 +40,6 @@ class DashboardController extends Controller
         ];
         $users = User::with('roles')->latest()->take(8)->get();
         return view('admin.dashboard', compact('stats', 'users'));
-    }
-
-    public function guru()
-    {
-        /** @var \App\Models\User $u */
-        $u = auth()->user();
-
-        $hasCreator = Schema::hasColumn('exams', 'created_by');
-
-        $mySoal = Question::where('created_by', $u->id)->count();
-
-        $examQuery = Exam::query();
-        if ($hasCreator) {
-            $examQuery->where('created_by', $u->id);
-        }
-
-        $myExamsCount = (clone $examQuery)->count();
-        $myExamIds    = (clone $examQuery)->pluck('id');
-
-        $todayExams = (clone $examQuery)
-            ->whereDate('start_at', today())
-            ->with('subject')
-            ->orderBy('start_at')
-            ->get();
-
-        $perluDinilai = ExamAttempt::whereIn('exam_id', $myExamIds)
-            ->where('status', 'submitted')
-            ->whereHas('answers', function ($q) {
-                $q->whereNull('score')
-                  ->whereHas('question', fn($qq) => $qq->whereIn('type', ['essay', 'coding']));
-            })
-            ->count();
-
-        return view('guru.dashboard', compact('u', 'mySoal', 'myExamsCount', 'todayExams', 'perluDinilai'));
     }
 
     public function siswa()

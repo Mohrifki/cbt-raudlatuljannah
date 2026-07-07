@@ -2,6 +2,7 @@
     <x-slot name="header">
         <h2 class="font-semibold text-xl text-gray-800 leading-tight">Koreksi Jawaban</h2>
     </x-slot>
+    <?php $rp = request()->routeIs('guru.*') ? 'guru' : 'admin'; ?>
 
     <div class="py-8">
         <div class="max-w-4xl mx-auto sm:px-6 lg:px-8 space-y-6">
@@ -21,12 +22,12 @@
                     <p class="font-semibold text-gray-800">
                         <?= e(optional($attempt->finished_at)?->format('d M Y H:i') ?? '-') ?></p>
                 </div>
-                <a href="<?= route('admin.grading.index') ?>" class="text-sm text-gray-500 hover:text-gray-700">
+                <a href="<?= route($rp . '.grading.index') ?>" class="text-sm text-gray-500 hover:text-gray-700">
                     <i class="fa-solid fa-arrow-left"></i> Kembali
                 </a>
             </div>
 
-            <form method="POST" action="<?= route('admin.grading.update', $attempt) ?>" class="space-y-6">
+            <form method="POST" action="<?= route($rp . '.grading.update', $attempt) ?>" class="space-y-6">
                 @csrf
                 @method('PUT')
 
@@ -79,7 +80,7 @@
                 @endforeach
 
                 <div class="flex justify-end gap-3">
-                    <a href="<?= route('admin.grading.index') ?>"
+                    <a href="<?= route($rp . '.grading.index') ?>"
                         class="px-4 py-2 rounded-lg text-sm text-gray-600 hover:bg-gray-100">Batal</a>
                     <button type="submit"
                         class="inline-flex items-center gap-2 px-5 py-2 rounded-lg bg-green-600 text-white text-sm font-medium hover:bg-green-700">

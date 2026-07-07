@@ -1,4 +1,5 @@
 <x-admin-layout title="Bank Soal">
+    <?php $rp = request()->routeIs('guru.*') ? 'guru' : 'admin'; ?>
     <div class="bg-white shadow-sm rounded-lg p-4 sm:p-6">
 
         @if (session('success'))
@@ -28,11 +29,13 @@
                         @endforeach
                     </select>
                 </form>
-                <a href="<?= route('admin.questions.import.form') ?>"
-                    class="inline-flex items-center justify-center gap-2 bg-blue-600 text-white font-semibold px-5 py-2.5 rounded-lg shadow hover:bg-blue-700 transition">
-                    <i class="fa-solid fa-file-import"></i> Import
-                </a>
-                <a href="<?= route('admin.questions.create') ?>"
+                @if ($rp === 'admin')
+                    <a href="<?= route('admin.questions.import.form') ?>"
+                        class="inline-flex items-center justify-center gap-2 bg-blue-600 text-white font-semibold px-5 py-2.5 rounded-lg shadow hover:bg-blue-700 transition">
+                        <i class="fa-solid fa-file-import"></i> Import
+                    </a>
+                @endif
+                <a href="<?= route($rp . '.questions.create') ?>"
                     class="inline-flex items-center justify-center gap-2 bg-green-600 text-white font-semibold px-5 py-2.5 rounded-lg shadow hover:bg-green-700 transition">
                     <i class="fa-solid fa-plus"></i> Tambah Soal
                 </a>
@@ -87,11 +90,11 @@
                             </td>
                             <td class="p-3 border text-center"><?= $q->score ?></td>
                             <td class="p-3 border text-center whitespace-nowrap space-x-2">
-                                <a href="<?= route('admin.questions.edit', $q) ?>"
+                                <a href="<?= route($rp . '.questions.edit', $q) ?>"
                                     class="inline-flex items-center justify-center w-8 h-8 rounded bg-indigo-50 text-indigo-600 hover:bg-indigo-100"
                                     title="Edit"><i class="fa-solid fa-pen"></i></a>
-                                <form action="<?= route('admin.questions.destroy', $q) ?>" method="POST" class="inline"
-                                    onsubmit="return confirm('Yakin hapus soal ini?')">
+                                <form action="<?= route($rp . '.questions.destroy', $q) ?>" method="POST"
+                                    class="inline" onsubmit="return confirm('Yakin hapus soal ini?')">
                                     @csrf @method('DELETE')
                                     <button type="submit"
                                         class="inline-flex items-center justify-center w-8 h-8 rounded bg-red-50 text-red-600 hover:bg-red-100"

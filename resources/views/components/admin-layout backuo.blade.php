@@ -1,17 +1,13 @@
 @php
     $menuTitles = [
-        'admin.dashboard' => 'Dashboard',
-        'guru.dashboard' => 'Dashboard',
+        'dashboard' => 'Dashboard',
         'admin.users.*' => 'Manajemen User',
         'admin.subjects.*' => 'Mata Pelajaran',
         'admin.plot-sessions.*' => 'Jadwal Plot',
         'admin.classes.*' => 'Kelas',
         'admin.questions.*' => 'Bank Soal',
-        'guru.questions.*' => 'Bank Soal',
         'admin.exams.*' => 'Manajemen Ujian',
-        'guru.exams.*' => 'Manajemen Ujian',
         'admin.grading.*' => 'Penilaian',
-        'guru.grading.*' => 'Penilaian',
         'admin.attendance.*' => 'Daftar Hadir',
         'admin.reports.*' => 'Laporan Nilai',
         'admin.settings.*' => 'Pengaturan',
@@ -36,7 +32,7 @@
         }
     </script>
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title><?= e($pageTitle) ?> — CBT Smaradja</title>
+    <title><?= e($title) ?> — CBT Smaradja</title>
     <link rel="icon" href="<?= asset('images/logo.png') ?>">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" rel="stylesheet">
     @vite(['resources/css/app.css', 'resources/js/app.js'])
@@ -291,7 +287,6 @@
     $active = fn($pattern) => request()->routeIs($pattern) ? 'bg-green-50 text-green-700' : 'text-gray-600 hover:bg-gray-100';
     $u = auth()->user();
     $initial = strtoupper(substr($u->name ?? 'U', 0, 1));
-    $isGuru = $u->hasRole('guru');
     ?>
 
     <input type="checkbox" id="nav-toggle" class="hidden">
@@ -301,7 +296,7 @@
     <aside class="app-sidebar">
         <!-- Brand + tombol collapse -->
         <div class="brand-row flex items-center justify-between gap-2 px-4 h-16 border-b border-gray-100">
-            <a href="<?= route($isGuru ? 'guru.dashboard' : 'admin.dashboard') ?>" class="flex items-center gap-2 overflow-hidden">
+            <a href="<?= route('admin.dashboard') ?>" class="flex items-center gap-2 overflow-hidden">
                 <img src="<?= asset('images/logo.png') ?>" alt="Logo" class="w-9 h-9 object-contain shrink-0">
                 <span class="brand-text font-bold text-gray-800 leading-tight">CBT <span
                         class="text-green-600">Smaradja</span></span>
@@ -321,28 +316,6 @@
 
         <!-- Menu -->
         <nav class="flex-1 overflow-y-auto px-3 py-4 space-y-1">
-            @if ($isGuru)
-            <!-- ===== MENU GURU ===== -->
-            <a href="<?= route('guru.dashboard') ?>" data-label="Dashboard"
-                class="nav-link <?= $active('guru.dashboard') ?>"><i class="fa-solid fa-gauge-high"></i><span
-                    class="nav-label">Dashboard</span></a>
-            @if (Route::has('guru.questions.index'))
-            <a href="<?= route('guru.questions.index') ?>" data-label="Bank Soal"
-                class="nav-link <?= $active('guru.questions.*') ?>"><i class="fa-solid fa-file-circle-question"></i><span
-                    class="nav-label">Bank Soal</span></a>
-            @endif
-            @if (Route::has('guru.exams.index'))
-            <a href="<?= route('guru.exams.index') ?>" data-label="Manajemen Ujian"
-                class="nav-link <?= $active('guru.exams.*') ?>"><i class="fa-solid fa-clipboard-list"></i><span
-                    class="nav-label">Manajemen Ujian</span></a>
-            @endif
-            @if (Route::has('guru.grading.index'))
-            <a href="<?= route('guru.grading.index') ?>" data-label="Penilaian"
-                class="nav-link <?= $active('guru.grading.*') ?>"><i class="fa-solid fa-clipboard-check"></i><span
-                    class="nav-label">Penilaian</span></a>
-            @endif
-            @else
-            <!-- ===== MENU ADMIN ===== -->
             <a href="<?= route('admin.dashboard') ?>" data-label="Dashboard"
                 class="nav-link <?= $active('admin.dashboard') ?>"><i class="fa-solid fa-gauge-high"></i><span
                     class="nav-label">Dashboard</span></a>
@@ -381,7 +354,6 @@
                 class="nav-link <?= $active('admin.settings.*') ?>">
                 <i class="fa-solid fa-gear"></i><span class="nav-label">Pengaturan</span>
             </a>
-            @endif
         </nav>
 
         <!-- User bawah -->
@@ -407,7 +379,7 @@
             <label for="nav-toggle"
                 class="md:hidden w-9 h-9 flex items-center justify-center rounded-lg text-gray-600 hover:bg-gray-100 cursor-pointer"><i
                     class="fa-solid fa-bars"></i></label>
-            <h1 class="text-lg font-bold text-gray-800"><?= e($pageTitle) ?></h1>
+            <h1 class="text-lg font-bold text-gray-800"><?= e($title) ?></h1>
         </header>
         <main class="p-4 sm:p-6">
             <?= $slot ?>

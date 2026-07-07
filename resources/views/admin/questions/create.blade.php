@@ -1,6 +1,7 @@
 <x-admin-layout title="Tambah Soal">
+    <?php $rp = request()->routeIs('guru.*') ? 'guru' : 'admin'; ?>
     <div class="max-w-3xl mx-auto">
-        <a href="<?= route('admin.questions.index') ?>"
+        <a href="<?= route($rp . '.questions.index') ?>"
             class="inline-flex items-center gap-2 text-sm text-gray-500 hover:text-green-600 mb-4"><i
                 class="fa-solid fa-arrow-left"></i> Kembali ke Bank Soal</a>
 
@@ -14,7 +15,7 @@
                 </div>
             </div>
 
-            <form action="<?= route('admin.questions.store') ?>" method="POST" class="p-6 space-y-5">
+            <form action="<?= route($rp . '.questions.store') ?>" method="POST" class="p-6 space-y-5">
                 @csrf
 
                 <div class="grid grid-cols-1 sm:grid-cols-2 gap-5">
@@ -115,7 +116,7 @@
                 </div>
 
                 <div class="flex items-center justify-end gap-3 pt-4 border-t">
-                    <a href="<?= route('admin.questions.index') ?>"
+                    <a href="<?= route($rp . '.questions.index') ?>"
                         class="inline-flex items-center gap-2 bg-gray-100 text-gray-700 font-semibold px-5 py-2.5 rounded-lg hover:bg-gray-200">Batal</a>
                     <button type="submit"
                         class="inline-flex items-center gap-2 bg-green-600 text-white font-semibold px-6 py-2.5 rounded-lg hover:bg-green-700 shadow"><i

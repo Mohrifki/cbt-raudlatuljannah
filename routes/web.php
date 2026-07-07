@@ -8,6 +8,10 @@ use App\Http\Controllers\Admin\SchoolClassController;
 use App\Http\Controllers\Admin\PlotSessionController;
 use App\Http\Controllers\Admin\UserController;
 use App\Http\Controllers\Admin\GradingController;
+use App\Http\Controllers\Admin\AttendanceController;
+use App\Http\Controllers\Admin\SettingController;
+use App\Http\Controllers\Admin\ReportController;
+
 
 Route::get('/', function () {
     return view('welcome');
@@ -33,6 +37,13 @@ Route::middleware('auth')->group(function () {
         Route::get('grading', [GradingController::class, 'index'])->name('grading.index');
         Route::get('grading/{attempt}', [GradingController::class, 'show'])->name('grading.show');
         Route::put('grading/{attempt}', [GradingController::class, 'update'])->name('grading.update');
+        Route::get('attendance', [AttendanceController::class, 'index'])->name('attendance.index');
+        Route::get('attendance/{exam}/print', [AttendanceController::class, 'print'])->name('attendance.print');
+        Route::get('reports', [ReportController::class, 'index'])->name('reports.index');
+        Route::get('reports/{exam}/print', [ReportController::class, 'print'])->name('reports.print');
+        Route::get('reports/{exam}/excel', [ReportController::class, 'exportExcel'])->name('reports.excel');
+        Route::get('settings', [SettingController::class, 'edit'])->name('settings.edit');
+        Route::put('settings', [SettingController::class, 'update'])->name('settings.update');
 
         // ===== JADWAL PLOT (route baru) =====
         Route::get('plot-sessions',                  [PlotSessionController::class, 'index'])->name('plot-sessions.index');
@@ -63,6 +74,21 @@ Route::middleware('auth')->group(function () {
     // === AREA GURU ===
     Route::middleware('role:guru')->prefix('guru')->name('guru.')->group(function () {
         Route::get('/dashboard', [DashboardController::class, 'guru'])->name('dashboard');
+
+        // ===== BANK SOAL (guru) — hanya soal milik guru sendiri =====
+        Route::resource('questions', \App\Http\Controllers\Guru\QuestionController::class)->except('show');
+        // Upload media (gambar/audio) untuk editor soal guru
+        Route::post('media/upload', [\App\Http\Controllers\Admin\MediaUploadController::class, 'store'])->name('media.upload');
+
+        // ===== MANAJEMEN UJIAN (guru) — hanya ujian milik guru sendiri =====
+        Route::get('exams/{exam}/questions', [\App\Http\Controllers\Guru\ExamController::class, 'questions'])->name('exams.questions');
+        Route::post('exams/{exam}/questions', [\App\Http\Controllers\Guru\ExamController::class, 'syncQuestions'])->name('exams.questions.sync');
+        Route::resource('exams', \App\Http\Controllers\Guru\ExamController::class)->except('show');
+
+        // ===== PENILAIAN (guru) — hanya pengerjaan pada ujian milik guru sendiri =====
+        Route::get('grading', [\App\Http\Controllers\Guru\GradingController::class, 'index'])->name('grading.index');
+        Route::get('grading/{attempt}', [\App\Http\Controllers\Guru\GradingController::class, 'show'])->name('grading.show');
+        Route::put('grading/{attempt}', [\App\Http\Controllers\Guru\GradingController::class, 'update'])->name('grading.update');
     });
 
     // === AREA SISWA ===

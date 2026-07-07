@@ -1,6 +1,7 @@
 <x-admin-layout title="Kelola Soal Ujian">
+    <?php $rp = request()->routeIs('guru.*') ? 'guru' : 'admin'; ?>
     <div class="max-w-3xl mx-auto">
-        <a href="<?= route('admin.exams.index') ?>"
+        <a href="<?= route($rp . '.exams.index') ?>"
             class="inline-flex items-center gap-2 text-sm text-gray-500 hover:text-green-600 mb-4"><i
                 class="fa-solid fa-arrow-left"></i> Kembali ke Daftar Ujian</a>
 
@@ -34,7 +35,7 @@
                         <div class="rounded-lg bg-amber-50 border border-amber-200 text-amber-800 px-4 py-3 text-sm">
                             Belum ada soal untuk mapel <b><?= e($exam->subject->name ?? '-') ?></b>. Pastikan soal di
                             Bank Soal memakai mapel yang <b>sama persis</b>, atau tambahkan di <a
-                                href="<?= route('admin.questions.create') ?>" class="underline font-medium">Bank
+                                href="<?= route($rp . '.questions.create') ?>" class="underline font-medium">Bank
                                 Soal</a>.
                         </div>
                     @else
@@ -44,7 +45,7 @@
                         </div>
                     @endif
                 @else
-                    <form action="<?= route('admin.exams.questions.sync', $exam) ?>" method="POST" class="space-y-4">
+                    <form action="<?= route($rp . '.exams.questions.sync', $exam) ?>" method="POST" class="space-y-4">
                         @csrf
 
                         <div class="flex flex-wrap items-center justify-between gap-3">

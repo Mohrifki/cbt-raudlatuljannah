@@ -1,6 +1,7 @@
 <x-admin-layout title="Import Soal">
+    <?php $rp = request()->routeIs('guru.*') ? 'guru' : 'admin'; ?>
     <div class="max-w-2xl mx-auto">
-        <a href="<?= route('admin.questions.index') ?>" class="inline-flex items-center gap-2 text-sm text-gray-500 hover:text-green-600 mb-4"><i class="fa-solid fa-arrow-left"></i> Kembali ke Bank Soal</a>
+        <a href="<?= route($rp . '.questions.index') ?>" class="inline-flex items-center gap-2 text-sm text-gray-500 hover:text-green-600 mb-4"><i class="fa-solid fa-arrow-left"></i> Kembali ke Bank Soal</a>
 
         <div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
             <div class="bg-gradient-to-r from-green-600 to-emerald-500 px-6 py-5 flex items-center gap-4">
@@ -27,10 +28,10 @@
                         <li>Isi soal sesuai kolom (jangan ubah baris judul).</li>
                         <li>Upload file yang sudah diisi.</li>
                     </ol>
-                    <a href="<?= route('admin.questions.import.template') ?>" class="inline-flex items-center gap-2 mt-3 bg-blue-600 text-white text-sm font-semibold px-4 py-2 rounded-lg hover:bg-blue-700"><i class="fa-solid fa-download"></i> Download Template</a>
+                    <a href="<?= route($rp . '.questions.import.template') ?>" class="inline-flex items-center gap-2 mt-3 bg-blue-600 text-white text-sm font-semibold px-4 py-2 rounded-lg hover:bg-blue-700"><i class="fa-solid fa-download"></i> Download Template</a>
                 </div>
 
-                <form action="<?= route('admin.questions.import') ?>" method="POST" enctype="multipart/form-data" class="space-y-4">
+                <form action="<?= route($rp . '.questions.import') ?>" method="POST" enctype="multipart/form-data" class="space-y-4">
                     @csrf
                     <div>
                         <label class="block text-sm font-medium text-gray-700 mb-1.5">File Excel / CSV</label>
@@ -48,6 +49,7 @@
                             </thead>
                             <tbody class="text-gray-600">
                                 <tr><td class="p-2 border font-medium">Kode Mapel</td><td class="p-2 border">Harus cocok dengan kode mapel yang ada (mis. MTK, INF)</td></tr>
+                                <tr><td class="p-2 border font-medium">Tingkat</td><td class="p-2 border"><code>10</code>, <code>11</code>, atau <code>12</code> (boleh <code>X</code>/<code>XI</code>/<code>XII</code>). Kosongkan = semua tingkat</td></tr>
                                 <tr><td class="p-2 border font-medium">Tipe</td><td class="p-2 border"><code>pg</code>, <code>essay</code>, atau <code>coding</code></td></tr>
                                 <tr><td class="p-2 border font-medium">Pertanyaan</td><td class="p-2 border">Teks soal (wajib)</td></tr>
                                 <tr><td class="p-2 border font-medium">Opsi A–E</td><td class="p-2 border">Khusus tipe <code>pg</code></td></tr>

@@ -57,9 +57,6 @@
                 <a href="<?= route('siswa.exams.index') ?>"
                     class="flex items-center gap-3 px-4 py-2.5 rounded-lg text-gray-700 hover:bg-green-50 hover:text-green-700 transition"><i
                         class="fa-solid fa-clipboard-list w-5 text-center"></i> Daftar Ujian</a>
-                <a href="<?= route('siswa.results.index') ?>"
-                    class="flex items-center gap-3 px-4 py-2.5 rounded-lg text-gray-700 hover:bg-green-50 hover:text-green-700 transition"><i
-                        class="fa-solid fa-award w-5 text-center"></i> Nilai Saya</a>
                 <a href="<?= route('profile.edit') ?>"
                     class="flex items-center gap-3 px-4 py-2.5 rounded-lg text-gray-700 hover:bg-green-50 hover:text-green-700 transition"><i
                         class="fa-solid fa-user w-5 text-center"></i> Profil</a>

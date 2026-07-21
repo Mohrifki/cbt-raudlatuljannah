@@ -29,12 +29,10 @@
                         @endforeach
                     </select>
                 </form>
-                @if ($rp === 'admin')
-                    <a href="<?= route('admin.questions.import.form') ?>"
-                        class="inline-flex items-center justify-center gap-2 bg-blue-600 text-white font-semibold px-5 py-2.5 rounded-lg shadow hover:bg-blue-700 transition">
-                        <i class="fa-solid fa-file-import"></i> Import
-                    </a>
-                @endif
+                <a href="<?= route($rp . '.questions.import.form') ?>"
+                    class="inline-flex items-center justify-center gap-2 bg-blue-600 text-white font-semibold px-5 py-2.5 rounded-lg shadow hover:bg-blue-700 transition">
+                    <i class="fa-solid fa-file-import"></i> Import
+                </a>
                 <a href="<?= route($rp . '.questions.create') ?>"
                     class="inline-flex items-center justify-center gap-2 bg-green-600 text-white font-semibold px-5 py-2.5 rounded-lg shadow hover:bg-green-700 transition">
                     <i class="fa-solid fa-plus"></i> Tambah Soal
@@ -52,10 +50,21 @@
             @endforeach
         </div>
 
+        <form id="bulkForm" method="POST" action="<?= route($rp . '.questions.bulk-destroy') ?>" onsubmit="return confirm('Yakin hapus semua soal yang terpilih? Tindakan ini tidak bisa dibatalkan.')">
+            @csrf
+        </form>
+        <div class="flex items-center gap-3 mb-3">
+            <button type="submit" form="bulkForm" id="btnBulkDelete" disabled
+                class="inline-flex items-center gap-2 bg-red-600 text-white text-sm font-semibold px-4 py-2 rounded-lg shadow hover:bg-red-700 disabled:opacity-40 disabled:cursor-not-allowed transition">
+                <i class="fa-solid fa-trash"></i> Hapus Terpilih (<span id="selCount">0</span>)
+            </button>
+        </div>
+
         <div class="overflow-x-auto">
             <table class="w-full text-left border border-gray-200 text-sm">
                 <thead class="bg-gray-100 text-gray-700">
                     <tr>
+                        <th class="p-3 border text-center w-10"><input type="checkbox" id="checkAll" class="rounded border-gray-300 text-green-600 focus:ring-green-500"></th>
                         <th class="p-3 border">No</th>
                         <th class="p-3 border">Mapel</th>
                         <th class="p-3 border">Soal</th>
@@ -79,6 +88,7 @@
                         }
                         ?>
                         <tr class="hover:bg-gray-50 align-top">
+                            <td class="p-3 border text-center"><input type="checkbox" name="ids[]" value="<?= $q->id ?>" form="bulkForm" class="row-check rounded border-gray-300 text-green-600 focus:ring-green-500"></td>
                             <td class="p-3 border"><?= $i + 1 ?></td>
                             <td class="p-3 border whitespace-nowrap"><?= e($q->subject->name ?? '-') ?></td>
                             <td class="p-3 border text-gray-700">
@@ -93,8 +103,8 @@
                                 <a href="<?= route($rp . '.questions.edit', $q) ?>"
                                     class="inline-flex items-center justify-center w-8 h-8 rounded bg-indigo-50 text-indigo-600 hover:bg-indigo-100"
                                     title="Edit"><i class="fa-solid fa-pen"></i></a>
-                                <form action="<?= route($rp . '.questions.destroy', $q) ?>" method="POST"
-                                    class="inline" onsubmit="return confirm('Yakin hapus soal ini?')">
+                                <form action="<?= route($rp . '.questions.destroy', $q) ?>" method="POST" class="inline"
+                                    onsubmit="return confirm('Yakin hapus soal ini?')">
                                     @csrf @method('DELETE')
                                     <button type="submit"
                                         class="inline-flex items-center justify-center w-8 h-8 rounded bg-red-50 text-red-600 hover:bg-red-100"
@@ -104,7 +114,7 @@
                         </tr>
                     @empty
                         <tr>
-                            <td colspan="6" class="p-4 text-center text-gray-500">Belum ada soal.</td>
+                            <td colspan="7" class="p-4 text-center text-gray-500">Belum ada soal.</td>
                         </tr>
                     @endforelse
                 </tbody>
@@ -112,4 +122,32 @@
         </div>
 
     </div>
+
+    <script>
+        (function () {
+            const checkAll = document.getElementById('checkAll');
+            const btn = document.getElementById('btnBulkDelete');
+            const selCount = document.getElementById('selCount');
+            const rows = () => Array.from(document.querySelectorAll('.row-check'));
+
+            function refresh() {
+                const checked = rows().filter(c => c.checked);
+                if (selCount) selCount.textContent = checked.length;
+                if (btn) btn.disabled = checked.length === 0;
+                if (checkAll) {
+                    checkAll.checked = rows().length > 0 && checked.length === rows().length;
+                    checkAll.indeterminate = checked.length > 0 && checked.length < rows().length;
+                }
+            }
+
+            if (checkAll) {
+                checkAll.addEventListener('change', function () {
+                    rows().forEach(c => c.checked = checkAll.checked);
+                    refresh();
+                });
+            }
+            rows().forEach(c => c.addEventListener('change', refresh));
+            refresh();
+        })();
+    </script>
 </x-admin-layout>

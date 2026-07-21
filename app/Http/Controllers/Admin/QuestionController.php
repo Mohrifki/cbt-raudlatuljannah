@@ -93,6 +93,16 @@ class QuestionController extends Controller
         return redirect()->route('admin.questions.index')->with('success', 'Soal berhasil dihapus.');
     }
 
+    public function bulkDestroy(Request $request)
+    {
+        $ids = array_filter((array) $request->input('ids', []));
+        if (empty($ids)) {
+            return redirect()->route('admin.questions.index')->with('success', 'Tidak ada soal yang dipilih.');
+        }
+        $count = Question::whereIn('id', $ids)->delete();
+        return redirect()->route('admin.questions.index')->with('success', "{$count} soal berhasil dihapus.");
+    }
+
     private function validateData(Request $request): array
     {
         return $request->validate([

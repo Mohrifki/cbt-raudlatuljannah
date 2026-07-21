@@ -12,8 +12,12 @@
         'guru.exams.*' => 'Manajemen Ujian',
         'admin.grading.*' => 'Penilaian',
         'guru.grading.*' => 'Penilaian',
+        'admin.monitoring.*' => 'Monitoring Ujian',
+        'guru.monitoring.*' => 'Monitoring Ujian',
         'admin.attendance.*' => 'Daftar Hadir',
         'admin.reports.*' => 'Laporan Nilai',
+        'admin.statistik.*' => 'Statistik',
+        'admin.kartu.*' => 'Kartu Ujian',
         'admin.settings.*' => 'Pengaturan',
     ];
     $pageTitle = 'Dashboard';
@@ -341,6 +345,11 @@
                 class="nav-link <?= $active('guru.grading.*') ?>"><i class="fa-solid fa-clipboard-check"></i><span
                     class="nav-label">Penilaian</span></a>
             @endif
+            @if (Route::has('guru.monitoring.index'))
+            <a href="<?= route('guru.monitoring.index') ?>" data-label="Monitoring Ujian"
+                class="nav-link <?= $active('guru.monitoring.*') ?>"><i class="fa-solid fa-desktop"></i><span
+                    class="nav-label">Monitoring Ujian</span></a>
+            @endif
             @else
             <!-- ===== MENU ADMIN ===== -->
             <a href="<?= route('admin.dashboard') ?>" data-label="Dashboard"
@@ -369,6 +378,10 @@
                 class="nav-link <?= $active('admin.grading.*') ?>">
                 <i class="fa-solid fa-clipboard-check"></i><span class="nav-label">Penilaian</span>
             </a>
+            <a href="<?= route('admin.monitoring.index') ?>" data-label="Monitoring Ujian"
+                class="nav-link <?= $active('admin.monitoring.*') ?>">
+                <i class="fa-solid fa-desktop"></i><span class="nav-label">Monitoring Ujian</span>
+            </a>
             <a href="<?= route('admin.attendance.index') ?>" data-label="Daftar Hadir"
                 class="nav-link <?= $active('admin.attendance.*') ?>">
                 <i class="fa-solid fa-clipboard-user"></i><span class="nav-label">Daftar Hadir</span>
@@ -376,6 +389,14 @@
             <a href="<?= route('admin.reports.index') ?>" data-label="Laporan Nilai"
                 class="nav-link <?= $active('admin.reports.*') ?>">
                 <i class="fa-solid fa-chart-column"></i><span class="nav-label">Laporan Nilai</span>
+            </a>
+            <a href="<?= route('admin.statistik.index') ?>" data-label="Statistik"
+                class="nav-link <?= $active('admin.statistik.*') ?>">
+                <i class="fa-solid fa-chart-pie"></i><span class="nav-label">Statistik</span>
+            </a>
+            <a href="<?= route('admin.kartu.index') ?>" data-label="Kartu Ujian"
+                class="nav-link <?= $active('admin.kartu.*') ?>">
+                <i class="fa-solid fa-id-card"></i><span class="nav-label">Kartu Ujian</span>
             </a>
             <a href="<?= route('admin.settings.edit') ?>" data-label="Pengaturan"
                 class="nav-link <?= $active('admin.settings.*') ?>">

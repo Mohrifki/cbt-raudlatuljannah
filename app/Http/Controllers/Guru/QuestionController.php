@@ -6,6 +6,9 @@ use App\Http\Controllers\Controller;
 use App\Models\Question;
 use App\Models\Subject;
 use Illuminate\Http\Request;
+use App\Imports\QuestionsImport;
+use App\Exports\QuestionsTemplateExport;
+use Maatwebsite\Excel\Facades\Excel;
 
 class QuestionController extends Controller
 {
@@ -105,6 +108,44 @@ class QuestionController extends Controller
         $this->authorizeOwner($question);
         $question->delete();
         return redirect()->route('guru.questions.index')->with('success', 'Soal berhasil dihapus.');
+    }
+
+    public function bulkDestroy(Request $request)
+    {
+        $ids = array_filter((array) $request->input('ids', []));
+        if (empty($ids)) {
+            return redirect()->route('guru.questions.index')->with('success', 'Tidak ada soal yang dipilih.');
+        }
+        // Hanya soal milik guru yang login yang benar-benar dihapus.
+        $count = Question::where('created_by', auth()->id())->whereIn('id', $ids)->delete();
+        return redirect()->route('guru.questions.index')->with('success', "{$count} soal berhasil dihapus.");
+    }
+
+    // ===== IMPORT SOAL (Excel/CSV) — created_by otomatis = guru yang login =====
+    public function importForm()
+    {
+        return view('admin.questions.import');
+    }
+
+    public function downloadTemplate()
+    {
+        return Excel::download(new QuestionsTemplateExport, 'template-soal.xlsx');
+    }
+
+    public function import(Request $request)
+    {
+        $request->validate([
+            'file' => 'required|file|mimes:xlsx,xls,csv',
+        ], [
+            'file.mimes' => 'File harus berformat Excel (.xlsx, .xls) atau .csv',
+        ]);
+
+        $import = new QuestionsImport();
+        Excel::import($import, $request->file('file'));
+
+        return redirect()->route('guru.questions.index')
+            ->with('success', "Berhasil import {$import->imported} soal.")
+            ->with('import_errors', $import->errors);
     }
 
     /**

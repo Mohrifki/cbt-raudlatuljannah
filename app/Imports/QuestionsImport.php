@@ -34,9 +34,15 @@ class QuestionsImport implements ToCollection, WithHeadingRow
             $isPg = $type === 'pilihan_ganda';
             $correct = strtolower(trim((string) ($row['kunci'] ?? '')));
 
+            // Tingkat/kelas: 10/11/12 atau X/XI/XII, kosong = semua tingkat (null)
+            $gradeRaw = strtolower(trim((string) ($row['tingkat'] ?? '')));
+            $gradeMap = ['x' => '10', 'xi' => '11', 'xii' => '12', '10' => '10', '11' => '11', '12' => '12'];
+            $grade = $gradeMap[$gradeRaw] ?? null;
+
             Question::create([
                 'subject_id'     => $subject->id,
                 'created_by'     => auth()->id(),
+                'grade'          => $grade,
                 'type'           => $type,
                 'question'       => $question,
                 'option_a'       => $isPg ? ($row['opsi_a'] ?? null) : null,

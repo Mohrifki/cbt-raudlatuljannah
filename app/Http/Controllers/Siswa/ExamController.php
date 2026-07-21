@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\Exam;
 use App\Models\ExamAttempt;
 use App\Models\ExamAnswer;
+use App\Models\ExamViolation;
 use App\Models\Question;
 use App\Models\User;
 use App\Models\PlotSession;
@@ -170,6 +171,12 @@ class ExamController extends Controller
     $count = $attempt->violation_count;
     $limit = 3;
 
+    // Catat detail kejadian pelanggaran
+    ExamViolation::create([
+      'attempt_id' => $attempt->id,
+      'type'       => trim((string) $request->input('reason')) ?: 'Aktivitas mencurigakan',
+    ]);
+
     if ($count >= $limit) {
       $this->gradeAndFinish($attempt);
     }
@@ -202,8 +209,17 @@ class ExamController extends Controller
         $ans->update(['is_correct' => $benar, 'score' => $benar ? ($q->score ?? 0) : 0]);
       }
     }
+    // Skor akhir dalam skala 0–100 (konsisten dengan penilaian esai/coding)
+    $answers  = $attempt->answers()->with('question')->get();
+    $totalMax = 0;
+    $totalGot = 0;
+    foreach ($answers as $a) {
+      $totalMax += (float) (optional($a->question)->score ?? 0);
+      $totalGot += (float) ($a->score ?? 0);
+    }
+
     $attempt->update([
-      'score'       => $attempt->answers()->sum('score'),
+      'score'       => $totalMax > 0 ? round($totalGot / $totalMax * 100, 2) : 0,
       'finished_at' => now(),
       'status'      => 'submitted',
     ]);

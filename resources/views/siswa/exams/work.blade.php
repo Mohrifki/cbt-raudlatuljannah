@@ -19,14 +19,20 @@
             <h1 class="text-2xl font-bold mb-2"><?= e($exam->title) ?></h1>
             <p class="text-gray-300 text-sm mb-1"><?= (int) $exam->duration ?> menit • <?= $questions->count() ?> soal
             </p>
-            <div class="text-left bg-white/10 rounded-xl p-4 my-4 text-sm space-y-1">
-                <p class="font-semibold text-amber-300"><i class="fa-solid fa-triangle-exclamation"></i> Aturan Ujian:
-                </p>
-                <p>• Dilarang pindah tab / keluar layar penuh.</p>
-                <p>• Klik kanan & copy-paste dinonaktifkan.</p>
-                <p>• Pelanggaran ke-3 → ujian otomatis dikumpulkan.</p>
+            <div class="text-left bg-white/10 rounded-xl p-4 my-4 text-sm space-y-1 max-h-64 overflow-y-auto">
+                <p class="font-semibold text-amber-300"><i class="fa-solid fa-triangle-exclamation"></i> Tata Tertib Ujian:</p>
+                <p>• Dilarang pindah tab, membuka aplikasi lain, atau keluar dari mode layar penuh.</p>
+                <p>• Klik kanan, menyalin (copy), memotong (cut), dan menempel (paste) dinonaktifkan & dicatat.</p>
+                <p>• Dilarang menggunakan asisten AI, Google Assistant, Circle to Search, screenshot, atau perangkat lain.</p>
+                <p>• Dilarang membuka buku/catatan atau bekerja sama dengan peserta lain.</p>
+                <p>• Setiap pelanggaran tercatat otomatis. Pelanggaran ke-3 membuat ujian langsung dikumpulkan.</p>
+                <p>• Kerjakan dengan jujur. Kecurangan dapat berakibat nilai dibatalkan.</p>
             </div>
-            <button id="btnStart" class="bg-green-600 hover:bg-green-700 px-6 py-3 rounded-xl font-semibold w-full"><i
+            <label class="flex items-start gap-2 text-left text-sm text-gray-200 mb-4 cursor-pointer">
+                <input type="checkbox" id="setujuTatib" class="mt-0.5 rounded border-gray-400 text-green-500 focus:ring-green-500">
+                <span>Saya telah membaca dan <span class="font-semibold text-white">menyetujui tata tertib</span> di atas serta bersedia menerima sanksi jika melanggar.</span>
+            </label>
+            <button id="btnStart" disabled class="bg-green-600 hover:bg-green-700 px-6 py-3 rounded-xl font-semibold w-full disabled:opacity-40 disabled:cursor-not-allowed transition"><i
                     class="fa-solid fa-play"></i> Masuk Mode Ujian</button>
         </div>
     </div>
@@ -299,7 +305,11 @@
             setTimeout(() => document.getElementById('formSubmit').submit(), 1200);
         }
 
-        ['copy', 'paste', 'cut'].forEach(ev => document.addEventListener(ev, e => e.preventDefault()));
+        ['copy', 'paste', 'cut'].forEach(ev => document.addEventListener(ev, e => {
+            e.preventDefault();
+            const aksi = ev === 'copy' ? 'menyalin (copy)' : (ev === 'cut' ? 'memotong (cut)' : 'menempel (paste)');
+            deteksiKeluar('Anda mencoba ' + aksi + ' teks.');
+        }));
         document.addEventListener('keydown', e => {
             if (e.key === 'F12' || (e.ctrlKey && ['c', 'v', 'x', 'u', 's', 'p'].includes(e.key.toLowerCase()))) e
                 .preventDefault();
@@ -313,7 +323,7 @@
                     'X-CSRF-TOKEN': CFG.csrf,
                     'Accept': 'application/json'
                 },
-                body: JSON.stringify({})
+                body: JSON.stringify({ reason: alasan })
             }).then(r => r.json()).then(d => {
                 if (!d.ok) return;
                 const badge = document.getElementById('violasiBadge');
@@ -344,7 +354,22 @@
             catatPelanggaran(alasan);
         }
 
-        document.getElementById('btnStart').addEventListener('click', () => {
+        // ===== Deteksi meninggalkan halaman (fokus hilang) — dihitung 1x per kepergian =====
+        let diLuar = false;
+        function tinggalkan(alasan) {
+            if (!sudahMulai || bolehKeluar || abaikanFokus) return;
+            if (diLuar) return; // sudah dihitung untuk kepergian ini, tunggu siswa kembali dulu
+            diLuar = true;
+            catatPelanggaran(alasan);
+        }
+        function kembaliKeUjian() { diLuar = false; }
+
+        const chkSetuju = document.getElementById('setujuTatib');
+        const btnStartEl = document.getElementById('btnStart');
+        if (chkSetuju) chkSetuju.addEventListener('change', () => { btnStartEl.disabled = !chkSetuju.checked; });
+
+        btnStartEl.addEventListener('click', () => {
+            if (chkSetuju && !chkSetuju.checked) return;
             const el = document.documentElement;
             if (el.requestFullscreen) el.requestFullscreen().catch(() => {});
             document.getElementById('overlay').classList.add('hidden');
@@ -358,15 +383,28 @@
 
         // pindah tab di dalam browser
         document.addEventListener('visibilitychange', () => {
-            if (document.hidden) deteksiKeluar('Anda meninggalkan halaman ujian.');
+            if (document.hidden) tinggalkan('Anda meninggalkan halaman ujian.');
+            else kembaliKeUjian();
         });
 
-        // ALT+Tab / pindah aplikasi / split-screen / klik luar jendela
-        window.addEventListener('blur', () => deteksiKeluar('Anda berpindah ke jendela/aplikasi lain.'));
+        // ALT+Tab / pindah aplikasi / split-screen / klik di luar jendela ujian
+        window.addEventListener('blur', () => tinggalkan('Anda berpindah ke jendela/aplikasi lain.'));
+        window.addEventListener('focus', kembaliKeUjian);
+
+        // Jaring pengaman: cek fokus tiap 1,5 detik (menangkap kasus yang tak memicu event blur)
+        setInterval(() => {
+            if (sudahMulai && !bolehKeluar && !abaikanFokus && !document.hidden && !document.hasFocus()) {
+                tinggalkan('Jendela ujian kehilangan fokus (klik di luar halaman).');
+            }
+        }, 1500);
+
+        // Halaman disembunyikan / ditinggalkan (mis. buka aplikasi lain, tarik notifikasi)
+        window.addEventListener('pagehide', () => tinggalkan('Halaman ujian ditinggalkan.'));
 
         // keluar dari layar penuh
         document.addEventListener('fullscreenchange', () => {
-            if (!document.fullscreenElement) deteksiKeluar('Anda keluar dari mode layar penuh.');
+            if (!document.fullscreenElement) tinggalkan('Anda keluar dari mode layar penuh.');
+            else kembaliKeUjian();
         });
 
         window.addEventListener('beforeunload', e => {

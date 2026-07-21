@@ -9,6 +9,7 @@ use App\Models\Subject;
 use App\Models\Exam;
 use App\Models\ExamAttempt;
 use App\Models\Question;
+use App\Models\ExamViolation;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Schema;
 
@@ -41,7 +42,44 @@ class DashboardController extends Controller
             'kelas' => SchoolClass::count(),
         ];
         $users = User::with('roles')->latest()->take(8)->get();
-        return view('admin.dashboard', compact('stats', 'users'));
+
+        // ===== Data statistik untuk grafik dashboard =====
+        $submitted = ExamAttempt::where('status', 'submitted')->with('exam.subject')->get();
+
+        $totalUjian   = Exam::count();
+        $totalSelesai = $submitted->count();
+        $sedangKerja  = ExamAttempt::where('status', '!=', 'submitted')->count();
+        $rataNilai    = $totalSelesai > 0 ? round($submitted->avg('score'), 1) : 0;
+        $totalLanggar = ExamViolation::count();
+
+        // Distribusi nilai (bucket huruf)
+        $buckets = ['A (90-100)' => 0, 'B (80-89)' => 0, 'C (70-79)' => 0, 'D (60-69)' => 0, 'E (0-59)' => 0];
+        foreach ($submitted as $a) {
+            $s = (float) $a->score;
+            if ($s >= 90) { $buckets['A (90-100)']++; }
+            elseif ($s >= 80) { $buckets['B (80-89)']++; }
+            elseif ($s >= 70) { $buckets['C (70-79)']++; }
+            elseif ($s >= 60) { $buckets['D (60-69)']++; }
+            else { $buckets['E (0-59)']++; }
+        }
+
+        // Rata-rata nilai per mapel
+        $perMapel = $submitted
+            ->groupBy(fn($a) => optional(optional($a->exam)->subject)->name ?: 'Lainnya')
+            ->map(fn($grp) => round($grp->avg('score'), 1));
+        $mapelLabels = $perMapel->keys()->all();
+        $mapelData   = array_values($perMapel->all());
+
+        // Partisipasi keseluruhan
+        $sudahIds   = ExamAttempt::where('status', 'submitted')->distinct()->pluck('user_id')->all();
+        $siswaSudah = User::role('siswa')->whereIn('id', $sudahIds ?: [0])->count();
+        $siswaBelum = max(0, $stats['siswa'] - $siswaSudah);
+
+        return view('admin.dashboard', compact(
+            'stats', 'users',
+            'totalUjian', 'totalSelesai', 'sedangKerja', 'rataNilai', 'totalLanggar',
+            'buckets', 'mapelLabels', 'mapelData', 'siswaSudah', 'siswaBelum'
+        ));
     }
 
     public function guru()

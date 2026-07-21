@@ -12,7 +12,6 @@ use App\Http\Controllers\Admin\AttendanceController;
 use App\Http\Controllers\Admin\SettingController;
 use App\Http\Controllers\Admin\ReportController;
 
-
 Route::get('/', function () {
     return view('welcome');
 });
@@ -42,6 +41,15 @@ Route::middleware('auth')->group(function () {
         Route::get('reports', [ReportController::class, 'index'])->name('reports.index');
         Route::get('reports/{exam}/print', [ReportController::class, 'print'])->name('reports.print');
         Route::get('reports/{exam}/excel', [ReportController::class, 'exportExcel'])->name('reports.excel');
+        Route::get('statistik', [\App\Http\Controllers\Admin\StatistikController::class, 'index'])->name('statistik.index');
+        Route::get('kartu', [\App\Http\Controllers\Admin\KartuController::class, 'index'])->name('kartu.index');
+        Route::get('kartu/{kelas}/print', [\App\Http\Controllers\Admin\KartuController::class, 'print'])->name('kartu.print');
+
+        // ===== MONITORING UJIAN LIVE =====
+        Route::get('monitoring', [\App\Http\Controllers\Admin\MonitoringController::class, 'index'])->name('monitoring.index');
+        Route::get('monitoring/attempt/{attempt}', [\App\Http\Controllers\Admin\MonitoringController::class, 'attempt'])->name('monitoring.attempt');
+        Route::put('monitoring/attempt/{attempt}/grade', [\App\Http\Controllers\Admin\MonitoringController::class, 'grade'])->name('monitoring.grade');
+        Route::get('monitoring/{exam}', [\App\Http\Controllers\Admin\MonitoringController::class, 'show'])->name('monitoring.show');
         Route::get('settings', [SettingController::class, 'edit'])->name('settings.edit');
         Route::put('settings', [SettingController::class, 'update'])->name('settings.update');
 
@@ -67,6 +75,7 @@ Route::middleware('auth')->group(function () {
         Route::get('questions/import', [\App\Http\Controllers\Admin\QuestionController::class, 'importForm'])->name('questions.import.form');
         Route::get('questions/import/template', [\App\Http\Controllers\Admin\QuestionController::class, 'downloadTemplate'])->name('questions.import.template');
         Route::post('questions/import', [\App\Http\Controllers\Admin\QuestionController::class, 'import'])->name('questions.import');
+        Route::post('questions/bulk-destroy', [\App\Http\Controllers\Admin\QuestionController::class, 'bulkDestroy'])->name('questions.bulk-destroy');
         Route::resource('questions', \App\Http\Controllers\Admin\QuestionController::class)->except('show');
         Route::post('media/upload', [\App\Http\Controllers\Admin\MediaUploadController::class, 'store'])->name('media.upload');
     });
@@ -76,6 +85,10 @@ Route::middleware('auth')->group(function () {
         Route::get('/dashboard', [DashboardController::class, 'guru'])->name('dashboard');
 
         // ===== BANK SOAL (guru) — hanya soal milik guru sendiri =====
+        Route::get('questions/import', [\App\Http\Controllers\Guru\QuestionController::class, 'importForm'])->name('questions.import.form');
+        Route::get('questions/import/template', [\App\Http\Controllers\Guru\QuestionController::class, 'downloadTemplate'])->name('questions.import.template');
+        Route::post('questions/import', [\App\Http\Controllers\Guru\QuestionController::class, 'import'])->name('questions.import');
+        Route::post('questions/bulk-destroy', [\App\Http\Controllers\Guru\QuestionController::class, 'bulkDestroy'])->name('questions.bulk-destroy');
         Route::resource('questions', \App\Http\Controllers\Guru\QuestionController::class)->except('show');
         // Upload media (gambar/audio) untuk editor soal guru
         Route::post('media/upload', [\App\Http\Controllers\Admin\MediaUploadController::class, 'store'])->name('media.upload');
@@ -89,6 +102,12 @@ Route::middleware('auth')->group(function () {
         Route::get('grading', [\App\Http\Controllers\Guru\GradingController::class, 'index'])->name('grading.index');
         Route::get('grading/{attempt}', [\App\Http\Controllers\Guru\GradingController::class, 'show'])->name('grading.show');
         Route::put('grading/{attempt}', [\App\Http\Controllers\Guru\GradingController::class, 'update'])->name('grading.update');
+
+        // ===== MONITORING UJIAN (guru) — hanya ujian milik guru sendiri =====
+        Route::get('monitoring', [\App\Http\Controllers\Guru\MonitoringController::class, 'index'])->name('monitoring.index');
+        Route::get('monitoring/attempt/{attempt}', [\App\Http\Controllers\Guru\MonitoringController::class, 'attempt'])->name('monitoring.attempt');
+        Route::put('monitoring/attempt/{attempt}/grade', [\App\Http\Controllers\Guru\MonitoringController::class, 'grade'])->name('monitoring.grade');
+        Route::get('monitoring/{exam}', [\App\Http\Controllers\Guru\MonitoringController::class, 'show'])->name('monitoring.show');
     });
 
     // === AREA SISWA ===
@@ -103,6 +122,9 @@ Route::middleware('auth')->group(function () {
         Route::post('ujian/{exam}/kumpulkan',  [\App\Http\Controllers\Siswa\ExamController::class, 'submit'])->name('exams.submit');
         Route::post('ujian/{exam}/pelanggaran', [\App\Http\Controllers\Siswa\ExamController::class, 'violation'])->name('exams.violation');
         Route::get('ujian/{exam}/hasil',       [\App\Http\Controllers\Siswa\ExamController::class, 'result'])->name('exams.result');
+
+        // ===== NILAI SAYA (siswa) — rekap semua nilai milik sendiri =====
+        Route::get('nilai',                    [\App\Http\Controllers\Siswa\ResultController::class, 'index'])->name('results.index');
         // (Fase 5C-2 nanti: mulai, kerjakan, simpan jawaban, submit)
     });
 });

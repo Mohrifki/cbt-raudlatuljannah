@@ -51,7 +51,7 @@ class UserController extends Controller
             'email'    => $request->email,
             'password' => Hash::make($isSiswa ? $request->nis : $request->password),
             'nis'      => $isSiswa ? $request->nis : null,
-            'class_id' => $isSiswa ? $request->class_id : null,
+            'class_id' => $isSiswa ? $request->class_id : 0,
         ]);
 
         $user->assignRole($request->role);
@@ -91,7 +91,7 @@ class UserController extends Controller
         $user->name     = $request->name;
         $user->email    = $request->email;
         $user->nis      = $isSiswa ? $request->nis : null;
-        $user->class_id = $isSiswa ? $request->class_id : null;
+        $user->class_id = $isSiswa ? $request->class_id : 0;
         if ($isSiswa) {
             // Password siswa selalu = NIS (dicetak di Kartu Ujian)
             $user->password = Hash::make($request->nis);
